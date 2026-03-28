@@ -1,117 +1,200 @@
-# Arabidopsis 胁迫转录组二次分析方案（重构版 v4.0）
 
-## 0) 研究边界与唯一问题
-### 0.1 边界二选一（强制）
-- **路径 A（默认）**：严格复用原论文五类（ABA/Salt/Dehydration/Mannitol/Cold）。
-- **路径 B**：扩库（PEG/Sorbitol/soil drought 等），并在题目与方法中声明为“新建库研究”。
+A. 研究主线与科学问题（1段）
+在严格复用原论文五类处理边界、且只纳入外来研究者可公开获得并可重建为样本级表达矩阵的数据前提下，本研究的唯一科学问题是：哪些 Arabidopsis 基因在 ABA、盐、脱水、甘露醇和低温五类 ABA-related stress 中构成跨研究稳定的 shared 转录响应，哪些基因表现为 dehydration-biased specific 响应；这些模式对应的上游 TF/cistrome 候选与可能的组织/细胞类型落点是什么。 该问题与 Sharma 2018 的“common/unique stress transcriptome”及 Sanchez-Munoz 2025 的“abiotic stress gene core”在目的上相近；差异在于本方案不做“全公开逆境库”扩展，也不以机器学习定义核心基因，而是用依赖关系显式建模的五类 effect-size 元分析来回答更窄、更可解释的科学问题。(PLOS)
+B. 总体大纲（分层编号）
+1.	数据可行性审查与研究边界冻结
+1.1 锁定原始出处、补充数据仓库、GEO/SRA 证据链
+1.2 审查样本字段、原始数据可得性、复制结构可判定性
+1.3 冻结五类处理边界与纳入/排除规则
+2.	原始数据重建与统一定量
+2.1 FASTQ 获取与统一质控
+2.2 统一转录本定量与基因级汇总
+2.3 建立样本清单、计数矩阵、设计矩阵
+3.	contrast-level 效应量提取与依赖结构编码
+3.1 构建 study 内匹配对比
+3.2 提取基因层面的 log2fc / se / pval / padj
+3.3 显式编码 shared control、同样本派生、多时间点近邻等依赖
+4.	五类处理内多层元分析与稳健性分析
+4.1 每类处理分别进行三层/多变量元分析
+4.2 输出 pooled effect、异质性、稳健性标记
+4.3 只保留稳健 treatment-level gene effects
+5.	跨处理 shared / specific 判定与模式模块构建
+5.1 基于“五类 pooled effect 矩阵”定义 shared
+5.2 定义 S1 / S2 / S3 三类 specific
+5.3 聚类得到 pattern modules，并锁定 dehydration-biased 模块
+6.	机制解释与定位整合
+6.1 DAP-seq / ChIP-Hub / TF-target 富集，排序上游 TF 候选
+6.2 将模块投影到 Arabidopsis root / above-ground 单细胞参考
+6.3 汇总 shared 核心基因与 dehydration-biased 特异基因清单
+说明：所有参数、阈值、窗口、超参均保留为**“待细则化”**。
+C. 完整实验方案
+Step 1. 数据可行性审查与研究边界冻结
+•	目标：
+在写入任何分析主链前，先确认：原文方案是否可追溯、公开仓库是否可访问、字段是否足够构造样本级矩阵与对比级效应量、五类处理是否都具备进入主链的可能。
+•	输入数据来源：
+1.	你上传的现有方案文件；
+2.	Shintani 2024 原文；
+3.	其 figshare 补充数据页；
+4.	Supplementary Table 1 对应的 GEO/SRA 系列页与运行页；
+5.	示例 GEO 系列页（用于验证公共页面字段可判读性），如 GSE74864。
+•	处理与分析动作（不写具体参数）：
+1.	锁定原始研究边界为 Path A：仅五类 ABA-related stress；
+2.	建立证据清单，逐项核对公开可得的数据层级：原始 FASTQ、样本元数据、处理标签、组织信息、时间信息、文库类型、study / run 映射；
+3.	审查补充表能否直接支撑后续步骤；
+4.	冻结纳入规则：仅野生型、仅公开原始测序可取回、仅处理/对照可明确配对、仅复制结构可被判定的数据进入候选队列；
+5.	冻结排除规则：突变体/转基因、仅处理后无对照、只有 processed summary 而无 raw run、处理定义模糊、样本标签不可回溯的数据排除；
+6.	生成 go / no-go 规则：若任一处理类在复制结构审查后不能形成足够的 eligible contrasts，则停止主链并返回“研究目的需重定义”。
+•	产出文件/表（含建议表头）：
+1.	source_evidence_inventory.tsv
+表头建议：source_id, source_type, title, doi_or_page, treatment_class, data_level, key_fields_present, access_status, usable_steps, note
+2.	feasibility_audit.tsv
+表头建议：requirement, evidence_source, pass_fail, risk_level, blocking_step, replacement_path
+3.	cohort_freeze.tsv
+表头建议：study_id, series_id, treatment_class, include_flag, exclusion_reason, raw_data_status, metadata_status, replicate_status
+•	本步骤方法依据 DOI：
+10.3389/fpls.2024.1343787；10.1371/journal.pone.0203266
+•	与前一步衔接依据 DOI（Step1 可写“无”）：
+无
+•	外来研究者可行性检查（能否实际拿到数据，若有风险写替代路径）：
+现有公开证据已确认：原文确实存在、五类处理边界明确、Supplementary Table 1 包含 SRA study ID、run ID、tissue、treatment type、treatment time、library type；figshare 也明确公开了 TPM、TN-ratio、TN-score，以及仅限 ABA 的 read count / DESeq2 结果。因此，样本级主链可行，但不能只靠补充表完成；其中最大的风险不是“拿不到数据”，而是复制结构是否足够支撑 contrast-level SE 的估计。这个风险可在本步骤通过逐 series 的 GEO/SRA 审查解决；若五类中有任何一类无法形成足够的 eligible contrasts，则应在 Step 1 即停止，而不是带病进入主链。(PMC)
+________________________________________
+Step 2. 原始 FASTQ 重建与统一定量
+•	目标：
+将 Step 1 冻结后的公开 run 统一重建为样本级 gene count / TPM 矩阵，形成后续对比分析唯一可用的基础输入。
+•	输入数据来源：
+cohort_freeze.tsv；Supplementary Table 1 中的 study_id/run_id；各 run 的原始 FASTQ；公开参考转录组文件。
+•	处理与分析动作（不写具体参数）：
+1.	下载纳入 run 的 FASTQ；
+2.	统一进行接头与低质量读段处理；
+3.	用同一参考注释进行转录本定量；
+4.	用统一汇总策略转为基因级 counts 与 TPM；
+5.	建立样本主清单并回填 study、treatment、tissue、time、pair、library 等字段；
+6.	生成 counts_matrix.tsv、tpm_matrix.tsv、design_matrix.tsv，作为全流程唯一的样本级输入。
+•	产出文件/表（含建议表头）：
+1.	sample_manifest.tsv
+表头建议：sample_id, study_id, series_id, run_id, treatment_class, condition, pair_id, control_group_id, tissue, organ_group, time_value, time_unit, ecotype, library_layout, library_type, strandedness, replicate_group, raw_fastq_path, qc_flag
+2.	counts_matrix.tsv
+表头建议：gene_id, sample_1, sample_2, ..., sample_n
+3.	tpm_matrix.tsv
+表头建议：gene_id, sample_1, sample_2, ..., sample_n
+4.	design_matrix.tsv
+表头建议：sample_id, study_id, treatment_class, condition, pair_id, control_group_id, organ_group, time_bin, replicate_group, dependency_group, include_flag
+•	本步骤方法依据 DOI：
+10.1038/nmeth.4197；10.12688/f1000research.7563.1；10.3389/fpls.2024.1343787
+•	与前一步衔接依据 DOI：
+10.3389/fpls.2024.1343787
+•	外来研究者可行性检查（能否实际拿到数据，若有风险写替代路径）：
+由于 Step 1 已锁定到含 SRA run ID 的公开样本，该步骤对外来研究者是可执行的。风险点在于：个别 run 可能被撤回、迁移或与 series 注释不一致；此时替代路径不是用 TN/TPM 直接顶替，而是把该 pair 标记为缺失并从主链剔除，因为后续 Step 3 需要统一来源的 sample-level counts 才能估计 SE。(PMC)
+________________________________________
+Step 3. contrast-level 效应量提取与依赖结构编码
+•	目标：
+从统一样本矩阵中构建研究内、器官/时间可比的处理-对照对比，提取每个 contrast 的基因层面 log2fc / se / pval / padj，并把非独立来源显式编码。
+•	输入数据来源：
+counts_matrix.tsv；design_matrix.tsv；sample_manifest.tsv
+•	处理与分析动作（不写具体参数）：
+1.	以 study 内部为单位，按 treatment_class + organ_group + time_bin + control_group_id 组装 treated-control contrasts；
+2.	对每个 eligible contrast 进行差异表达建模，提取 gene-level log2fc、lfcSE、统计量与多重校正结果；
+3.	显式记录依赖标签：
+	shared_control_id
+	same_sample_derivation_flag
+	nearby_time_block
+	same_protocol_block
+	study_id
+4.	对不可估计标准误的 contrast 直接判定为 ineligible，不进入主链；
+5.	生成后续元分析所需的 effect-size 表。
+•	产出文件/表（含建议表头）：
+1.	contrast_manifest.tsv
+表头建议：contrast_id, study_id, treatment_class, organ_group, time_bin, control_group_id, n_treat, n_control, shared_control_id, same_protocol_block, eligibility, exclusion_reason
+2.	gene_effects.tsv
+表头建议：gene_id, contrast_id, study_id, treatment_class, organ_group, time_bin, log2fc, se, stat, pval, padj, baseMean
+3.	eligible_contrasts.tsv
+表头建议：contrast_id, treatment_class, study_id, inclusion_status, reason
+•	本步骤方法依据 DOI：
+10.1186/s13059-014-0550-8；10.1186/1471-2105-15-91
+•	与前一步衔接依据 DOI：
+10.12688/f1000research.7563.1；10.1186/s13059-014-0550-8
+•	外来研究者可行性检查（能否实际拿到数据，若有风险写替代路径）：
+该步骤完全依赖 Step 2 产物，不再要求新外部数据；真正的可行性门槛是复制结构是否足够让 SE 被估计。GEO series 页面通常能公开总体设计与 replicate 信息，样本页还可回溯到 SRA，因此“能否判定 eligible contrast”在公开侧是可操作的。风险替代路径只有一种：排除不满足条件的 contrast，而不是人为构造方差。(NCBI)
+________________________________________
+Step 4. 五类处理内多层元分析与稳健性分析
+•	目标：
+在每个 treatment class 内，把多个 contrasts 的 gene-level effect sizes 合成为依赖感知的 pooled treatment effect，并完成异质性与稳健性审查。
+•	输入数据来源：
+gene_effects.tsv；contrast_manifest.tsv；eligible_contrasts.tsv
+•	处理与分析动作（不写具体参数）：
+1.	按 treatment class 分别对每个基因拟合三层/多变量随机效应元分析；
+2.	以 study_id 与 contrast_id 的嵌套关系表达主要层级；
+3.	用 shared_control_id / nearby_time_block / same_protocol_block 作为依赖结构建模或敏感性分析输入；
+4.	输出每基因在每 treatment class 下的 pooled_log2fc, CI, tau2, I2, p_meta, padj_meta；
+5.	做 leave-one-study-out、高影响研究剔除、依赖参数敏感性 / RVE 敏感性；
+6.	只保留在稳健性分析下不翻转的 treatment-level effects。
+•	产出文件/表（含建议表头）：
+1.	meta_effects_by_treatment.tsv
+表头建议：gene_id, treatment_class, k_studies, k_contrasts, pooled_log2fc, ci_low, ci_high, tau2, I2, p_meta, padj_meta, direction_stability, heterogeneity_note
+2.	meta_robustness.tsv
+表头建议：gene_id, treatment_class, loo_flip_flag, influence_flag, rho_sensitivity_flag, rve_sensitivity_flag, final_keep_flag
+3.	heterogeneity_summary.tsv
+表头建议：treatment_class, moderator, summary_stat, interpretation_note
+•	本步骤方法依据 DOI：
+10.18637/jss.v036.i03；10.3758/s13428-012-0261-6；10.1002/jrsm.5
+•	与前一步衔接依据 DOI：
+10.3758/s13428-012-0261-6；10.1186/1471-2105-15-91
+•	外来研究者可行性检查（能否实际拿到数据，若有风险写替代路径）：
+该步骤不再新增外部数据需求，完全由 Step 3 产物驱动。其唯一阻断条件是：某个 treatment class 的 eligible contrasts / independent studies 太少，导致 treatment-level meta 失去统计意义。此时不能硬做五类 shared/specific；必须回到 Step 1 的 go/no-go 规则。
+________________________________________
+Step 5. 跨处理 shared / specific 判定与模式模块构建
+•	目标：
+把五类处理的 pooled effects 统一到一个“gene × five-treatment”矩阵上，完成 shared 与 specific 的操作化定义，并构建 pattern modules。
+•	输入数据来源：
+meta_effects_by_treatment.tsv；meta_robustness.tsv
+•	处理与分析动作（不写具体参数）：
+1.	建立 gene × treatment_class pooled effect 矩阵；
+2.	将 final_keep_flag = TRUE 的 treatment-level effect 作为判定基础；
+3.	定义：
+	shared：在不少于“待细则化”个处理类中方向一致，且效应与校正后显著性同时满足条件；
+	S1 单类特异：仅 1 类处理满足主判定条件；
+	S2 强度偏置：多类均变化，但某 1 类显著更强；
+	S3 方向分歧：不同处理间方向相反；
+4.	对 pooled effect 矩阵聚类，形成 pattern modules；
+5.	单独标记 dehydration_bias_flag，作为本研究 specific 主结果之一。
+•	产出文件/表（含建议表头）：
+1.	cross_treatment_effect_matrix.tsv
+表头建议：gene_id, ABA_effect, Salt_effect, Dehydration_effect, Mannitol_effect, Cold_effect, class_prelabel
+2.	gene_pattern_class.tsv
+表头建议：gene_id, class_label, subclass_label, consistency_code, strongest_treatment, dehydration_bias_flag
+3.	pattern_module.tsv
+表头建议：module_id, gene_id, class_label, centroid_ABA, centroid_Salt, centroid_Dehydration, centroid_Mannitol, centroid_Cold
+•	本步骤方法依据 DOI：
+10.3389/fpls.2024.1343787；10.1371/journal.pone.0203266；10.1038/s41467-025-59542-3
+•	与前一步衔接依据 DOI：
+10.3389/fpls.2024.1343787；10.1371/journal.pone.0203266
+•	外来研究者可行性检查（能否实际拿到数据，若有风险写替代路径）：
+本步骤只依赖 Step 4 产物，不新增外部数据依赖。风险主要是分类稳定性：若某基因在 leave-one-study-out 或依赖参数敏感性下发生翻转，则只能保留其 module 归属，不保留其 individual class label 作为强结论。
+________________________________________
+Step 6. 机制解释与定位整合（TF / cistrome + 组织/细胞类型）
+•	目标：
+在不改变主线结论的前提下，对 Step 5 的 shared 与 dehydration-biased specific 模块给出上游 TF/cistrome 候选与组织/细胞类型落点。
+•	输入数据来源：
+gene_pattern_class.tsv；pattern_module.tsv；cross_treatment_effect_matrix.tsv；meta_effects_by_treatment.tsv；
+外部资源：Arabidopsis DAP-seq / Plant Cistrome / ChIP-Hub 目标集；Arabidopsis root 与 above-ground 单细胞参考图谱。
+•	处理与分析动作（不写具体参数）：
+1.	以 module 或 class-specific gene set 为单位，做基于实证 TF-target 集的上游 TF 富集；
+2.	综合不同数据库来源、目标基因重叠数、方向一致性与显著性，对 TF 候选排序；
+3.	将同一批模块基因集用 rank-based gene-set scoring 投影到 root 与 above-ground 单细胞参考；
+4.	依据 organ match / developmental stage match / stress-background match 生成可比性等级 High / Medium / Low；
+5.	形成最终候选表：优先保留shared 核心基因与dehydration-biased specific 基因，并为每个基因附上 TF 候选与 cell-type 支持。
+•	产出文件/表（含建议表头）：
+1.	tf_cistrome_prior.tsv
+表头建议：module_id, tf_id, source_db, overlap_n, enrich_p, padj, direction_concordance, evidence_level, rank
+2.	module_celltype_mapping.tsv
+表头建议：module_id, atlas_source, organ_match, celltype_id, celltype_name, score, comparability_grade, interpretation_level
+3.	candidate_master_table.tsv
+表头建议：gene_id, class_label, dehydration_bias_flag, pooled_pattern, top_tf_candidates, top_celltype_support, confidence_tier, note
+•	本步骤方法依据 DOI：
+10.3389/fgene.2020.566569；10.1038/nprot.2017.055；10.1038/s41467-022-30770-1；10.1016/j.csbj.2021.06.043；10.1093/plphys/kiab537；10.1016/j.devcel.2022.01.008
+•	与前一步衔接依据 DOI：
+10.1371/journal.pone.0203266；10.1038/s41467-025-59542-3
+•	外来研究者可行性检查（能否实际拿到数据，若有风险写替代路径）：
+TF/cistrome 资源对外可访问，足以支持候选调控层面的排序；但它们不能支撑因果结论。单细胞参考方面，Arabidopsis 已有 root atlas 与 root/above-ground atlas，可用于模块投影；但原始五类 bulk 数据来自 seedlings、leaves、rosette leaves、roots、shoots、buds 的混合集合，而现有单细胞参考并未与五类 stress 全部精确匹配，因此本层只能作为探索性支持，不能作为 shared/specific 的判定门槛。(PMC)
 
-### 0.2 唯一科学问题
-在选定边界内，识别 shared 与 specific 的稳健转录模式，并解析其上游调控候选与细胞类型落点。
 
----
-
-## 1) 数据输入闭环（显式补全）
-> 这是主链起点，必须写死，禁止隐含步骤。
-
-## Step 1.1 原始数据重建
-SRA/FASTQ 下载 → 统一 QC → 统一定量/计数（样本级）→ 构建对比设计矩阵。
-
-**必产物**：
-- `sample_manifest.tsv`
-- `counts_matrix.tsv`（sample × gene）
-- `design_matrix.tsv`（sample-level covariates）
-
-## Step 1.2 contrast-level 效应量提取
-从 `counts_matrix + design_matrix` 统一计算 contrast-level `log2fc/se`。
-
-**必产物**：
-- `contrast_manifest.tsv`
-- `gene_effects.tsv`（`gene_id, contrast_id, log2fc, se, pval, padj, baseMean`）
-- `eligible_contrasts.tsv`
-
-> 说明：原文补充表（TPM/TN-ratio/TN-score）可用于对照与解释，但不直接替代主模型效应量输入。
-
----
-
-## 2) 输入对象匹配（防止分析悬空）
-- **元分析主链输入**：`gene_effects.tsv`（contrast-level）。
-- **WGCNA/ML 输入**：`counts_matrix.tsv + sample labels`（sample-level）。
-
-规则：
-1) 没有样本级表达矩阵，不运行 WGCNA/样本级 ML；
-2) 任何新增分析必须先声明其输入对象来自哪张表。
-
----
-
-## 3) 主模型与依赖结构（可执行版）
-## Step 3.1 非独立来源显式拆分
-同 study 内至少区分以下依赖来源：
-- shared control；
-- 同样本派生多对比；
-- 相近时间点重复；
-- 同器官同 protocol 的重复对比。
-
-## Step 3.2 主模型
-采用多层/多变量元分析（如 `rma.mv`），将上述依赖源映射到协方差结构（V）或分层随机结构。
-
-**主输出**：`pooled_log2fc, CI95, tau2, I2, p_meta, padj_meta`。  
-PI 仅作异质性解释，不作硬闸门。
-
-## Step 3.3 最小稳健性
-- leave-one-study-out
-- 高影响研究剔除
-- 依赖结构参数敏感性（rho 网格）
-
----
-
-## 4) 主结果定义（shared/specific 操作化）
-## Step 4.1 shared 定义
-基因在 ≥N 类处理中方向一致，且效应达到阈值并通过多重校正。
-
-## Step 4.2 specific 定义（拆三类）
-- **S1 单类特异**：仅 1 类处理达阈值；
-- **S2 强度偏置**：多类均变化，但某 1 类显著更强；
-- **S3 方向分歧**：不同处理方向相反。
-
-> 结果表必须标注 S1/S2/S3，禁止笼统写“specific”。
-
-## Step 4.3 pattern clustering
-在“gene × treatment_class pooled effect”矩阵上聚类，模块标签继承 shared/S1/S2/S3。
-
----
-
-## 5) 机制解释层（上游调控 / cistrome）
-输入：Step 4 模块。  
-输出：模块对应 TF/cistrome 候选优先级列表。  
-边界：仅支持“候选调控”表述，不做因果结论。
-
----
-
-## 6) 单细胞/细胞类型定位层（算法与边界写死）
-## Step 6.1 算法三选一（必须预注册）
-- A：gene-set/module scoring
-- B：enrichment ranking
-- C：deconvolution
-
-## Step 6.2 适用边界
-仅当单细胞参考与 bulk 在器官/组织与处理背景可比时，才可作为“验证”；
-否则降级为“探索性支持”。
-
-输出：`module_celltype_mapping.tsv`，并给出可比性等级（High/Medium/Low）。
-
----
-
-## 7) 可选 ML 层（支持，不主导）
-可选：WGCNA、Elastic Net、XGBoost/RF。  
-硬约束：按 study 分层训练/验证、跨研究外部验证、与主模型冲突时不改写主结论。
-
----
-
-## 8) 结论进入规则
-仅当以下同时满足：
-1) 主模型显著且方向稳定；
-2) shared/specific 分类在稳健性分析下不翻转；
-3) 调控层与细胞定位层提供同向支持；
-4) 结论不越过所选边界（A 或 B）。
-
-否则降级为探索性结论。
