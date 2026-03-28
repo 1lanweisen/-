@@ -1,0 +1,117 @@
+# Arabidopsis 胁迫转录组二次分析方案（重构版 v4.0）
+
+## 0) 研究边界与唯一问题
+### 0.1 边界二选一（强制）
+- **路径 A（默认）**：严格复用原论文五类（ABA/Salt/Dehydration/Mannitol/Cold）。
+- **路径 B**：扩库（PEG/Sorbitol/soil drought 等），并在题目与方法中声明为“新建库研究”。
+
+### 0.2 唯一科学问题
+在选定边界内，识别 shared 与 specific 的稳健转录模式，并解析其上游调控候选与细胞类型落点。
+
+---
+
+## 1) 数据输入闭环（显式补全）
+> 这是主链起点，必须写死，禁止隐含步骤。
+
+## Step 1.1 原始数据重建
+SRA/FASTQ 下载 → 统一 QC → 统一定量/计数（样本级）→ 构建对比设计矩阵。
+
+**必产物**：
+- `sample_manifest.tsv`
+- `counts_matrix.tsv`（sample × gene）
+- `design_matrix.tsv`（sample-level covariates）
+
+## Step 1.2 contrast-level 效应量提取
+从 `counts_matrix + design_matrix` 统一计算 contrast-level `log2fc/se`。
+
+**必产物**：
+- `contrast_manifest.tsv`
+- `gene_effects.tsv`（`gene_id, contrast_id, log2fc, se, pval, padj, baseMean`）
+- `eligible_contrasts.tsv`
+
+> 说明：原文补充表（TPM/TN-ratio/TN-score）可用于对照与解释，但不直接替代主模型效应量输入。
+
+---
+
+## 2) 输入对象匹配（防止分析悬空）
+- **元分析主链输入**：`gene_effects.tsv`（contrast-level）。
+- **WGCNA/ML 输入**：`counts_matrix.tsv + sample labels`（sample-level）。
+
+规则：
+1) 没有样本级表达矩阵，不运行 WGCNA/样本级 ML；
+2) 任何新增分析必须先声明其输入对象来自哪张表。
+
+---
+
+## 3) 主模型与依赖结构（可执行版）
+## Step 3.1 非独立来源显式拆分
+同 study 内至少区分以下依赖来源：
+- shared control；
+- 同样本派生多对比；
+- 相近时间点重复；
+- 同器官同 protocol 的重复对比。
+
+## Step 3.2 主模型
+采用多层/多变量元分析（如 `rma.mv`），将上述依赖源映射到协方差结构（V）或分层随机结构。
+
+**主输出**：`pooled_log2fc, CI95, tau2, I2, p_meta, padj_meta`。  
+PI 仅作异质性解释，不作硬闸门。
+
+## Step 3.3 最小稳健性
+- leave-one-study-out
+- 高影响研究剔除
+- 依赖结构参数敏感性（rho 网格）
+
+---
+
+## 4) 主结果定义（shared/specific 操作化）
+## Step 4.1 shared 定义
+基因在 ≥N 类处理中方向一致，且效应达到阈值并通过多重校正。
+
+## Step 4.2 specific 定义（拆三类）
+- **S1 单类特异**：仅 1 类处理达阈值；
+- **S2 强度偏置**：多类均变化，但某 1 类显著更强；
+- **S3 方向分歧**：不同处理方向相反。
+
+> 结果表必须标注 S1/S2/S3，禁止笼统写“specific”。
+
+## Step 4.3 pattern clustering
+在“gene × treatment_class pooled effect”矩阵上聚类，模块标签继承 shared/S1/S2/S3。
+
+---
+
+## 5) 机制解释层（上游调控 / cistrome）
+输入：Step 4 模块。  
+输出：模块对应 TF/cistrome 候选优先级列表。  
+边界：仅支持“候选调控”表述，不做因果结论。
+
+---
+
+## 6) 单细胞/细胞类型定位层（算法与边界写死）
+## Step 6.1 算法三选一（必须预注册）
+- A：gene-set/module scoring
+- B：enrichment ranking
+- C：deconvolution
+
+## Step 6.2 适用边界
+仅当单细胞参考与 bulk 在器官/组织与处理背景可比时，才可作为“验证”；
+否则降级为“探索性支持”。
+
+输出：`module_celltype_mapping.tsv`，并给出可比性等级（High/Medium/Low）。
+
+---
+
+## 7) 可选 ML 层（支持，不主导）
+可选：WGCNA、Elastic Net、XGBoost/RF。  
+硬约束：按 study 分层训练/验证、跨研究外部验证、与主模型冲突时不改写主结论。
+
+---
+
+## 8) 结论进入规则
+仅当以下同时满足：
+1) 主模型显著且方向稳定；
+2) shared/specific 分类在稳健性分析下不翻转；
+3) 调控层与细胞定位层提供同向支持；
+4) 结论不越过所选边界（A 或 B）。
+
+否则降级为探索性结论。
