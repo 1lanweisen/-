@@ -1,351 +1,397 @@
-以下为可直接粘贴进 Word 的正式排版稿。
-________________________________________
-中文植物胁迫转录组研究方案（优化后的最终完整方案·可执行版）
-A. 唯一科学问题
-本研究聚焦于一个且仅一个科学问题：在 Arabidopsis thaliana 野生型的五类 ABA 相关胁迫（ABA、盐、脱水、渗透/甘露醇、低温）公开 RNA-seq 数据中，若仅纳入“可回溯至原始 FASTQ、treated-control 可配对、且可估计 contrast-level 不确定性”的数据，能否先在各处理类别内部完成依赖感知元分析，再在跨处理层面仅判定两类生物学终点，即 shared_core genes 与 dehydration-biased genes；随后仅将这两类终点置于 Arabidopsis 专属 TF/cistrome 及组织/细胞语境中进行解释，而不再开启第二条分析主线。该问题与 Shintani 2024 所界定的五类 ABA-related stress 公共 RNA-seq 研究边界一致，但进一步将终点从一般性的“重叠响应基因”收紧为“经元分析稳定支持的 shared core / dehydration-biased 双终点”。Shintani 2024 的原始研究确实聚焦 ABA、Salt、Dehydration、Osmotic 和 Cold 五类胁迫，并基于 216 个 paired datasets 识别了共同调控与潜在脱水偏置响应基因，因此本研究问题具有明确外部边界与现实增量空间。(Frontiers)
-A1. 研究目的先例验证
-先例 1
-**DOI：**10.1371/journal.pone.0203266
-相似点：
-该研究以 Arabidopsis 干旱与低温转录响应中的“共同响应”与“特异响应”为核心问题，直接证明“跨逆境共享核心响应”与“逆境偏置响应”可以作为一个独立且可发表的科学问题。
-差异点：
-该研究主要使用 microarray 数据，处理范围限于 drought 与 cold，并未覆盖五类 ABA 相关胁迫；同时也未采用本研究拟使用的“raw FASTQ 重建—contrast-level effect size 提取—依赖感知元分析”技术链条。
-可接受性结论：
-虽然数据平台和处理范围较窄，但其足以说明：以“跨逆境共享核心响应”与“逆境特异性偏置响应”为终点，是已有先例支持的问题设定。(PLOS)
-先例 2
-**DOI：**10.3390/ijms14047617
-相似点：
-该研究提出了 Arabidopsis 中存在 plant core environmental stress response genes，本质上与本研究拟识别 shared_core genes 的思路高度一致。
-差异点：
-该研究更偏向“核心环境胁迫响应”的概念整合，并非以本研究所强调的“原始 FASTQ 可追溯 + contrast-level 不确定性 + 依赖感知元分析”为技术主干；同时也未将 dehydration-biased genes 作为第二个明确终点单独提出。
-可接受性结论：
-该研究可作为 shared_core 终点的直接生物学先例，因此本研究将 shared_core 设为 headline output 具有可接受性；只要第二终点 dehydration-biased 仍从属于同一主问题，而不是额外开启独立主线，即可成立。(MDPI)
-补充支持
-**DOI：**10.1038/s41467-025-59542-3
-该研究进一步提出了“stress gene core”概念，说明“核心胁迫程序”在近年文献环境中仍是活跃、可接受且具有持续发表空间的研究终点。(Nature)
-先例验证结论
-结论：本研究目的可接受，不需重定义。
-理由在于，已有文献已分别从“common vs specific”与“core stress response”两个方向提供了足够接近的外部先例，而本研究的增量价值在于：将 Shintani 2024 所界定的五类 ABA 相关胁迫边界、原始 FASTQ 可回溯性、contrast-level 不确定性、依赖感知元分析以及 shared_core / dehydration-biased 双终点有机压缩为一条单主线。(Frontiers)
-B. 总体大纲（单主线）
-本研究首先冻结研究目的与纳入边界，仅允许 Arabidopsis thaliana 野生型、五类 ABA 相关胁迫、公开 RNA-seq、可回溯到 raw FASTQ、treated-control 可配对、且可估计 contrast-level SE 的数据进入分析；随后依据原文、figshare 与 GEO/SRA 建立公开证据链并完成 cohort freeze；之后统一从 raw FASTQ 重建 gene-level 输入矩阵，并在 study 内提取 contrast-level log2FC / SE 与依赖结构；再在各处理类别内部完成依赖感知元分析；继而在跨处理层面只判定两类主结果，即 shared_core 与 dehydration-biased；最后仅以 Arabidopsis 专属 TF/cistrome 与组织/细胞图谱对这两类结果进行解释，而不再反向修改主结果标签。全流程所有阈值、最小样本要求与统计界值均统一写为“待细则化”。(Frontiers)
-C. 完整方案
-Step 1. 研究目的落地与纳入边界冻结
-目标
-将 A1 已通过的研究目的正式落地为不可漂移的纳入/排除规则，并预先定义主线停机条件。
-输入数据来源
-原始数据：Shintani 2024 原文、Shintani 2024 figshare 数据页、GEO/SRA 公开页面。
-Step 0 产物：旧方案文件。
-分析动作
-将研究对象冻结为：Arabidopsis thaliana、野生型、五类 ABA 相关胁迫、公开 RNA-seq、可回溯到 raw FASTQ、可明确 treated-control 配对、可判定 biological replicate 结构、可在后续稳定估计 contrast-level SE。
-将主结果冻结为两类：shared_core 与 dehydration-biased。
-将排除规则冻结为：突变体/转基因材料、无对照、仅有 processed matrix 而无原始数据、组织或时间信息不可回填、处理定义模糊、无法判定 replicate 结构、同一样本重复记录无法去重。
-将主线停机条件冻结为：若五类处理中的任一类在 Step 2 结束后仍不能形成可执行的 eligible contrasts，则停止正文主链并输出“研究目的需重定义”。
-本步骤所有阈值、最小样本要求与统计界值均统一写为“待细则化”。
-产出文件/表（建议表头）
-purpose_lock.md
-表头建议：question_id, final_question, headline_outputs, scope_freeze, no_go_rule
-inclusion_rulebook.tsv
-表头建议：rule_id, rule_type, definition, evidence_source, pass_criterion
-no_go_criteria.tsv
-表头建议：treatment_class, minimum_requirement, fail_action, downgrade_allowed
-本步骤方法依据 DOI（至少1个）
-10.3389/fpls.2024.1343787。(Frontiers)
-与前一步衔接依据 DOI（至少1个）+ 一句话解释为何该 DOI 支持两步连接
-10.1371/journal.pone.0203266。
-解释：该 DOI 证明“common vs specific”本身是可成立的生物学问题，因此在进入数据层前必须先冻结问题边界，而不能边分析边改题。(PLOS)
-外来研究者可行性检查（公开可得性、缺失风险、降级路径）
-Shintani 2024 原文与 figshare 页面均为公开资源，因此研究边界的冻结可以由外来研究者独立核验。潜在缺失并不在于“是否能读到边界描述”，而在于后续具体 series 是否确有 raw FASTQ、配对对照和 replicate 信息。降级路径仅允许“删除不合格 study/contrast”，不允许为了补样本而把研究问题外扩至“全部 abiotic stress”。若五类中的任一处理类别在 Step 2 后不能形成可执行 contrasts，则整条主线终止。(Frontiers)
-Step 2. 公开数据证据链建立与 cohort freeze
-目标
-将候选 study/run 从“文献中被提及”转化为“外来研究者可逐条验证、逐条下载、逐条配对”的可执行 cohort。
-输入数据来源
-原始数据：Shintani 2024 figshare 补充数据页、GEO/SRA series 页、run 页、样本页、原始论文全文。
-Step 1 产物：inclusion_rulebook.tsv、no_go_criteria.tsv。
-分析动作
-逐一核对 study_id、run_id、tissue、treatment type、treatment time、library type。
-逐一确认各 series 是否具备公开 raw FASTQ、treated-control 可配对关系、可判定 biological replicate 结构，以及组织与时间信息是否可映射到统一分箱。
-将全部候选条目写入 candidate_run_registry.tsv，再根据“可下载、可配对、可解释”三项条件生成 cohort_freeze.tsv。
-对于信息不全但可通过 GEO 样本页或原论文补证的条目，标记为 recoverable；对于无法补证者，直接排除。
-本步骤禁止仅凭补充表中的 processed matrix 直接纳入研究主链。
-产出文件/表（建议表头）
-source_evidence_inventory.tsv
-表头建议：source_id, source_type, doi_or_url, study_id, run_id, tissue, treatment_type, treatment_time, library_type, raw_fastq_open, pairing_info_open, replicate_info_open, usable_flag, note
-candidate_run_registry.tsv
-表头建议：study_id, series_id, run_id, treatment_class, tissue_raw, time_raw, library_type, candidate_flag
-cohort_freeze.tsv
-表头建议：study_id, series_id, run_id, treatment_class, organ_group, time_bin, control_group_id, include_flag, exclusion_reason
-metadata_gap_register.tsv
-表头建议：study_id, missing_field, recoverable_flag, recovery_source, final_decision
-本步骤方法依据 DOI（至少1个）
-10.3389/fpls.2024.1343787
-10.6084/m9.figshare.22566583。(Frontiers)
-与前一步衔接依据 DOI（至少1个）+ 一句话解释为何该 DOI 支持两步连接
-10.6084/m9.figshare.22566583。
-解释：Step 1 冻结的是抽象边界，而该 figshare 补充数据页正是将边界落成可核查的 study/run/tissue/time/library 字段。(Figshare)
-外来研究者可行性检查（公开可得性、缺失风险、降级路径）
-figshare、GEO 与 SRA 页面均可公开访问，能够支撑外来研究者独立建立证据链。以 GSE74864 为例，其页面明确给出了 normal、ABA 与 dehydration 三条件，1 h 与 3 h 两时间点，以及每点 3 个生物学重复，可作为配对与 replicate 信息页面级核验的范例。潜在缺失在于，并非所有 series 都像该例一样信息完整，部分条目需要回到样本页或原文补证。降级路径是仅保留“页面可验证 + 文献可补证”的条目，不允许凭经验或推测补全 pair_id 与 replicate 结构。若某处理类别在 cohort_freeze.tsv 中不能形成最小可执行 cohort，则研究主线停止。(NCBI)
-Step 3. 原始 FASTQ 重建与统一 gene-level 定量
-目标
-将冻结 cohort 的原始 reads 统一重建为后续唯一允许使用的 gene-level counts / abundance 输入。
-输入数据来源
-原始数据：纳入 run 的 raw FASTQ、统一参考转录组与注释文件。
-Step 2 产物：cohort_freeze.tsv、source_evidence_inventory.tsv。
-分析动作
-下载原始 FASTQ 文件。
-统一开展 reads 预处理。
-统一开展 transcript-level quantification。
-统一汇总到 gene level。
-生成样本主表，并将 study、treatment、organ、time、pair、library、replicate 等字段回填至设计矩阵。
-从本步骤起，后续主链仅允许使用本步骤产生的统一 gene-level 输入，不接受外部 processed TPM、processed FC 或外部差异基因表直接混入。
-产出文件/表（建议表头）
-sample_manifest.tsv
-表头建议：sample_id, study_id, series_id, run_id, treatment_class, condition, organ_group, time_value, time_unit, time_bin, pair_id, control_group_id, library_layout, library_type, strandedness, replicate_group, raw_fastq_path, include_flag
-qc_summary.tsv
-表头建议：sample_id, read_count_raw, read_count_clean, qc_flag, note
-quant_manifest.tsv
-表头建议：sample_id, quant_file_path, reference_release, note
-counts_matrix.tsv
-表头建议：gene_id, sample_1, sample_2, ...
-abundance_matrix.tsv
-表头建议：gene_id, sample_1, sample_2, ...
-design_matrix.tsv
-表头建议：sample_id, study_id, treatment_class, condition, organ_group, time_bin, pair_id, control_group_id, replicate_group, dependency_group, include_flag
-本步骤方法依据 DOI（至少1个）
-10.1093/bioinformatics/bty560
-10.1038/nmeth.4197
-10.12688/f1000research.7563.2。(PubMed)
-与前一步衔接依据 DOI（至少1个）+ 一句话解释为何该 DOI 支持两步连接
-10.3389/fpls.2024.1343787。
-解释：Step 2 已经将每个 run 的 study/run/tissue/time/library 字段冻结，因此 Step 3 才能够将这些字段稳定映射为统一的 quantification 作业与样本设计矩阵。(Frontiers)
-外来研究者可行性检查（公开可得性、缺失风险、降级路径）
-本步骤仅依赖 Step 2 已核实可访问的公开原始数据。潜在缺失主要表现为个别 run 撤回、损坏，或 layout 与元数据记录不一致。降级路径只能是“删 pair / 删 run，不回填 processed 值”；也即一旦某条原始数据不可用，必须在 sample_manifest.tsv 与 cohort_freeze.tsv 中显式剔除，不能借用补充表或既有论文中的处理后矩阵代替。若某处理类别因原始数据失败而下降为不可执行状态，则返回 Step 1 所定义的停机条件。(PubMed)
-Step 4. study 内 contrast-level 效应量提取与依赖编码
-目标
-在统一矩阵基础上构造可比 contrasts，提取每个 contrast 的 gene-level log2FC / SE，并显式编码其非独立性。
-输入数据来源
-Step 3 产物：counts_matrix.tsv、design_matrix.tsv、sample_manifest.tsv。
-分析动作
-按照 study_id + treatment_class + organ_group + time_bin + control_group_id 构造 study 内可比 contrasts。
-对每个 eligible contrast 开展差异表达建模，输出基因层面的 log2fc、se、pval、padj。
-同步写入依赖标签，包括：study_id、shared_control_id、same_protocol_block、nearby_time_block、organ_group。
-对于 replicate 结构不足、或无法稳定估计 SE 的 contrast，一律标记为 ineligible，禁止进入后续元分析主链。
-产出文件/表（建议表头）
-contrast_manifest.tsv
-表头建议：contrast_id, study_id, treatment_class, organ_group, time_bin, control_group_id, n_treat, n_control, shared_control_id, same_protocol_block, nearby_time_block, eligibility, exclusion_reason
-gene_effects.tsv
-表头建议：gene_id, contrast_id, study_id, treatment_class, organ_group, time_bin, log2fc, se, stat, pval, padj, base_mean, direction
-dependency_map.tsv
-表头建议：contrast_id, study_id, shared_control_id, same_protocol_block, nearby_time_block, dependency_group
-eligible_contrasts.tsv
-表头建议：contrast_id, treatment_class, inclusion_status, reason
-本步骤方法依据 DOI（至少1个）
-10.1186/s13059-014-0550-8。(PubMed)
-与前一步衔接依据 DOI（至少1个）+ 一句话解释为何该 DOI 支持两步连接
-10.12688/f1000research.7563.2。
-解释：该 DOI 支持从 transcript-level quantification 汇总得到可供 count-based 差异分析使用的 gene-level 输入，因此 Step 3 输出可直接进入 Step 4。(PubMed)
-外来研究者可行性检查（公开可得性、缺失风险、降级路径）
-本步骤不新增外部数据，完全依赖 Step 3 的统一输入。真正的风险并不在于“拿不到文件”，而在于某些 study 虽有 FASTQ，却缺乏足够复制结构，不能支持 SE 估计。降级路径仅允许剔除不可估 SE 的 contrast，不允许人为赋值方差，也不允许将“只有 fold change、没有 SE”的条目并入主链。若某处理类别在 eligible_contrasts.tsv 中无法保留可分析 contrasts，则主线停止。(PubMed)
-Step 5. treatment class 内依赖感知元分析
-目标
-在每个处理类别内部，将多个 dependent contrasts 合成为 gene-level pooled treatment effect，并完成稳定性筛查。
-输入数据来源
-Step 4 产物：gene_effects.tsv、dependency_map.tsv、eligible_contrasts.tsv。
-分析动作
-按 treatment class 分开，对每个 gene 拟合三层或等价的依赖感知随机效应模型。
-主模型反映 study 与 contrast 的嵌套关系，敏感性分析显式处理 shared control 与近邻时间点依赖。
-输出 pooled_log2fc、区间估计、异质性指标 与稳健性标记。
-仅保留在 leave-one-study-out 与依赖结构敏感性检查下方向不翻转的 pooled effect 进入 Step 6。
-产出文件/表（建议表头）
-meta_effects_by_treatment.tsv
-表头建议：gene_id, treatment_class, k_studies, k_contrasts, pooled_log2fc, ci_low, ci_high, tau2, i2, p_meta, padj_meta, keep_flag
-meta_robustness.tsv
-表头建议：gene_id, treatment_class, loo_flip_flag, influence_flag, dependence_sensitivity_flag, final_keep_flag
-heterogeneity_summary.tsv
-表头建议：treatment_class, moderator, summary_stat, interpretation_note
-本步骤方法依据 DOI（至少1个）
-10.18637/jss.v036.i03
-10.3758/s13428-012-0261-6
-10.1002/jrsm.5。(Journal of Statistical Software)
-与前一步衔接依据 DOI（至少1个）+ 一句话解释为何该 DOI 支持两步连接
-10.3758/s13428-012-0261-6。
-解释：Step 4 已经将 effect size 及其依赖标签显式写出，因此 Step 5 才能在“不假装独立”的前提下完成 treatment-level 合成。(Springer Link)
-外来研究者可行性检查（公开可得性、缺失风险、降级路径）
-本步骤不新增外部数据。潜在缺失主要在于真实协方差难以被精确恢复。降级路径不是将 dependent effects 强行视为独立样本，而是采用更保守的依赖感知建模与稳健方差估计来表达不确定性。若某处理类别的 pooled effects 在主要稳健性检查中大面积翻转，则说明该类别证据不足，不得继续进入跨处理终点判定。(PubMed)
-Step 6. 跨处理 shared_core 与 dehydration-biased 判定
-目标
-将五类处理的 pooled effects 统一到同一个 gene × five-treatment 矩阵中，仅产出两类主结果：shared_core 与 dehydration-biased。
-输入数据来源
-Step 5 产物：meta_effects_by_treatment.tsv、meta_robustness.tsv。
-分析动作
-构建 gene × five-treatment pooled effect 矩阵。
-以 final_keep_flag = TRUE 作为唯一允许进入主判定的 treatment-level effect。
-定义 shared_core：五类处理内方向一致、均有稳健支持、且在敏感性分析中不翻转。
-定义 dehydration-biased：脱水处理稳健成立，且其效应强度或稳定性相较其他四类表现出偏置，但不满足 shared_core 的定义。
-所有不满足这两类定义的基因，统一进入背景表，不再扩展为第三类、第四类主结果。
-产出文件/表（建议表头）
-cross_treatment_effect_matrix.tsv
-表头建议：gene_id, aba_effect, salt_effect, dehydration_effect, mannitol_effect, cold_effect, shared_core_flag, dehydration_biased_flag
-shared_core_genes.tsv
-表头建议：gene_id, direction_code, support_count, robustness_note
-dehydration_biased_genes.tsv
-表头建议：gene_id, dehydration_pattern_code, comparator_note, robustness_note
-ambiguous_background.tsv
-表头建议：gene_id, non_headline_reason
-本步骤方法依据 DOI（至少1个）
-10.1371/journal.pone.0203266
-10.1038/s41467-025-59542-3。(PLOS)
-与前一步衔接依据 DOI（至少1个）+ 一句话解释为何该 DOI 支持两步连接
-10.1038/s41467-025-59542-3。
-解释：该 DOI 说明多胁迫 transcriptomic meta-analysis 可以在综合效应之上凝练出 stress gene core，因此 Step 5 的 pooled treatment effects 是进入 Step 6 最终分类的合理输入。(Nature)
-外来研究者可行性检查（公开可得性、缺失风险、降级路径）
-本步骤不引入新数据，潜在问题仅在于最终标签是否稳定。降级路径为：凡在 leave-one-study-out 或 dependence sensitivity 下出现翻转的基因，一律保留于 ambiguous_background.tsv，不得进入 headline gene sets。若 shared_core 或 dehydration-biased 的多数候选无法通过稳定性检查，则不得输出对应 headline gene set。(PLOS)
-Step 7. 机制解释：TF/cistrome 与组织/细胞类型定位
-目标
-在不改动 Step 6 分类结果的前提下，仅对 shared_core 与 dehydration-biased 两类结果进行上游调控与组织/细胞语境解释。
-输入数据来源
-Step 6 产物：shared_core_genes.tsv、dehydration_biased_genes.tsv、cross_treatment_effect_matrix.tsv。
-原始数据：Arabidopsis DAP-seq 目标集、ChIP-Hub、Arabidopsis life-cycle atlas、Arabidopsis above-ground / root 单细胞参考、drought leaf atlas。
-分析动作
-分别对两类 gene set 开展 Arabidopsis-specific TF-target enrichment。
-优先从“基因集 → 上游 TF 预测”切入，再以 DAP-seq 与 ChIP-Hub 进行交叉排序。
-将两类 gene set 投影到 life-cycle atlas；如需更细组织背景，则进一步投影到 above-ground atlas、root atlas 或 drought leaf atlas。
-单细胞层仅用于生成 support_tier 与语境解释，不允许反向修改 shared_core 或 dehydration-biased 标签。
-产出文件/表（建议表头）
-tf_prioritization.tsv
-表头建议：set_label, tf_id, source_db, overlap_n, enrich_p, padj, dap_support, chip_support, rank
-cell_context_mapping.tsv
-表头建议：set_label, atlas_source, organ, celltype_id, celltype_name, score, support_tier, note
-candidate_master_table.tsv
-表头建议：gene_id, class_label, pooled_pattern, top_tf_candidates, top_cell_context, evidence_tier
-本步骤方法依据 DOI（至少1个）
-10.3389/fpls.2022.942710
-10.1016/j.cell.2016.04.038
-10.1038/s41467-022-30770-1
-10.1038/s41477-025-02072-z
-10.1093/plphys/kiab537
-10.1016/j.devcel.2022.01.008
-10.1038/s41477-026-02254-3。(Frontiers)
-与前一步衔接依据 DOI（至少1个）+ 一句话解释为何该 DOI 支持两步连接
-10.3389/fpls.2022.942710。
-解释：Step 6 已经固定了最终 gene sets，因此 Step 7 仅需对既定基因集进行 Arabidopsis-specific TF enrichment，而不是回到上一步改写分类。(Frontiers)
-外来研究者可行性检查（公开可得性、缺失风险、降级路径）
-CisCross、DAP-seq、ChIP-Hub 与多个 Arabidopsis atlas 均有公开论文或公开资源可依托。潜在缺失不在于“资源不存在”，而在于图谱与 bulk stress 的组织或时间背景不完全匹配。降级路径是优先使用覆盖范围最大的 life-cycle atlas；若具体场景不完全贴合，则将单细胞证据降级为 support_tier = medium/low，仅作为语境支持，而不触动 Step 6 主结论。若图谱无法为两类 gene sets 提供一致语境，不影响 Step 6 主结论，仅影响 Step 7 的解释层级。(Frontiers)
-D. 主线一致性自检（证明非方法学主导）
-本方案并非“为了使用元分析、单细胞图谱或 TF 富集而拼接方法”，而是从一开始就将科学问题限定为：五类 ABA 相关胁迫中，哪些基因构成 shared_core，哪些基因仅对 dehydration 表现出稳定偏置。Step 1 与 Step 2 的作用是保证问题边界可执行；Step 3 至 Step 5 的作用是获得可信的 treatment-level effect；Step 6 是唯一的主结果判定位点；Step 7 被明确限制为解释模块，不得反写主结果。因此，整个设计是“问题驱动方法”，而非“方法驱动问题”。这一结构也呼应了近年 stress gene core 研究中对“先定义问题、再组织方法”的强调。(Frontiers)
-E. 缺陷修复映射表（旧方案缺陷 -> 新方案修复）
-1.	旧方案缺陷：
-研究目的先例验证虽已出现，但尚未被真正前置为正文准入门槛。
-新方案修复：
-将 A1 改为硬前置关卡；若先例验证无法成立，则停止正文并输出“研究目的需重定义”。
-2.	旧方案缺陷：
-单主线骨架清楚，但 Step 7 的资源较多，存在被审稿人误读为第二主线的风险。
-新方案修复：
-明确规定 Step 7 只负责解释，不得反向修改 Step 6 标签。
-3.	旧方案缺陷：
-raw FASTQ、paired control、replicate、SE 可估计这些门槛已提及，但停机条件不够刚。
-新方案修复：
-在 Step 1 与 Step 2 同时写入 treatment-class 级 no-go 规则。
-4.	旧方案缺陷：
-Step 3 至 Step 5 方法链完整，但“为什么必须按此顺序做”的衔接依据不够明确。
-新方案修复：
-每一步新增“与前一步衔接依据 DOI + 一句话解释”，强化主线连续性。
-5.	旧方案缺陷：
-Step 6 已定义 shared_core / dehydration-biased，但不稳定候选仍有进入 headline result 的空间。
-新方案修复：
-增加 leave-one-study-out 与 dependence sensitivity 双重稳定性门槛，不稳定者全部退入背景表。
-6.	旧方案缺陷：
-文件落点较多，但部分位置仍偏“流程叙述”，不够文件化。
-新方案修复：
-每一步强制写清输入来源、输出文件/表及建议表头。
-7.	旧方案缺陷：
-在当前审稿环境下，AI 方案最常见风险是引文错配、虚假引用、表述顺滑但证据落点不清。
-新方案修复：
-本版本将每一步压缩为“输入文件/表—分析动作—输出文件/表—固定 DOI 支撑—外来研究者可行性检查”的固定结构，以减少空泛叙述与错配风险。相关学术论文与出版方/图书馆博客均表明，假引文与证据错配已成为明确的审稿敏感点。(PubMed)
-F. 证据清单（DOI/URL + 用途 + 检索日期）
-1. 核心边界与数据源
-**DOI：**10.3389/fpls.2024.1343787
-**用途：**确认五类 ABA-related stress 公共 RNA-seq 的研究边界与主问题背景。
-**检索日期：**2026-03-28。(Frontiers)
-**DOI：**10.6084/m9.figshare.22566583
-**用途：**确认补充数据页与 study/run/tissue/time/library 字段入口。
-**检索日期：**2026-03-28。(Figshare)
-URL：https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74864
-**用途：**示例核验公开页面上的处理条件、时间点与 biological replicates。
-**检索日期：**2026-03-28。(NCBI)
-2. 研究目的先例
-**DOI：**10.1371/journal.pone.0203266
-**用途：**先例 1；支持“common vs specific”的跨逆境问题设定。
-**检索日期：**2026-03-28。(PLOS)
-**DOI：**10.3390/ijms14047617
-**用途：**先例 2；支持“plant core environmental stress response genes”作为共享核心终点。
-**检索日期：**2026-03-28。(MDPI)
-**DOI：**10.1038/s41467-025-59542-3
-**用途：**补充支持“stress gene core”在近年仍是可接受终点。
-**检索日期：**2026-03-28。(Nature)
-3. 原始数据重建与差异分析
-**DOI：**10.1093/bioinformatics/bty560
-**用途：**reads 预处理。
-**检索日期：**2026-03-28。(PubMed)
-**DOI：**10.1038/nmeth.4197
-**用途：**transcript-level quantification。
-**检索日期：**2026-03-28。(Nature)
-**DOI：**10.12688/f1000research.7563.2
-**用途：**transcript-to-gene 汇总。
-**检索日期：**2026-03-28。(PubMed)
-**DOI：**10.1186/s13059-014-0550-8
-**用途：**study 内差异表达与 effect size 提取。
-**检索日期：**2026-03-28。(PubMed)
-4. 依赖感知元分析
-**DOI：**10.18637/jss.v036.i03
-**用途：**元分析实现。
-**检索日期：**2026-03-28。(Journal of Statistical Software)
-**DOI：**10.3758/s13428-012-0261-6
-**用途：**三层/依赖效应量元分析。
-**检索日期：**2026-03-28。(Springer Link)
-**DOI：**10.1002/jrsm.5
-**用途：**稳健方差估计。
-**检索日期：**2026-03-28。(PubMed)
-5. TF/cistrome 与细胞语境解释
-**DOI：**10.3389/fpls.2022.942710
-**用途：**Arabidopsis-specific TF enrichment / CisCross。
-**检索日期：**2026-03-28。(Frontiers)
-**DOI：**10.1016/j.cell.2016.04.038
-**用途：**Arabidopsis DAP-seq cistrome。
-**检索日期：**2026-03-28。(PubMed)
-**DOI：**10.1038/s41467-022-30770-1
-**用途：**ChIP-Hub / TF-target regulome。
-**检索日期：**2026-03-28。(Nature)
-**DOI：**10.1038/s41477-025-02072-z
-**用途：**Arabidopsis life-cycle atlas。
-**检索日期：**2026-03-28。(PubMed)
-**DOI：**10.1093/plphys/kiab537
-**用途：**Arabidopsis above-ground / root atlas。
-**检索日期：**2026-03-28。(OUP Academic)
-**DOI：**10.1016/j.devcel.2022.01.008
-**用途：**Arabidopsis root atlas。
-**检索日期：**2026-03-28。(Oak Ridge National Laboratory)
-**DOI：**10.1038/s41477-026-02254-3
-**用途：**drought leaf atlas。
-**检索日期：**2026-03-28。(PubMed)
-6. 审稿风险与 AI 生成文本常见缺陷
-**DOI：**10.1038/s41598-023-41032-5
-**用途：**支持“fabricated bibliographic citations”是 AI 文稿的高风险问题。
-**检索日期：**2026-03-28。(PubMed)
-**DOI：**10.1136/rmdopen-2023-003248
-**用途：**支持“学科场景下也会出现 false references”的判断。
-**检索日期：**2026-03-28。(PubMed)
-**DOI：**10.1080/08989621.2026.2645390
-**用途：**支持“hallucinated citations 在特定场景下具有严重学术后果”的判断。
-**检索日期：**2026-03-28。(PubMed)
-URL：https://www.sagepub.com/explore-our-content/blogs/posts/sage-perspectives/2025/06/11/ai-detection-for-peer-reviewers-look-out-for-red-flags
-**用途：**整理审稿中针对 AI 文稿的常见红旗，强调“无单一红旗，仍需专家人工判断”。
-**检索日期：**2026-03-28。(SAGE Publishing)
-URL：https://group.springernature.com/gp/group/media/press-releases/new-research-integrity-tools-using-ai/27200740
-**用途：**确认出版方已部署识别 AI-generated fake content/problematic images 的工具。
-**检索日期：**2026-03-28。(Springer Nature Group)
-URL：https://blogs.library.duke.edu/blog/2023/03/09/chatgpt-and-fake-citations/
-**用途：**图书馆博客证据；支持“不要把 AI 生成来源列表直接视为已核实文献”的判断。
-**检索日期：**2026-03-28。(Duke University Libraries Blogs)
-________________________________________
-如需，我可以下一条继续把这份内容压缩成“院内开题/基金本子风格”的更正式版。
+已完整阅读你上传的旧方案，并据此重写。旧方案的主问题、七步结构和 fixed-field 思路已经成形，但解释层过宽、cohort 准入与停机规则还不够硬、以及近年资源未区分“主结论必需证据”和“解释层可选证据”，这会放大引文错配、空泛表述和公共数据落地失败的风险。 ([PubMed][1])
 
+# 中文植物胁迫转录组研究方案（优化后的最终完整方案·可执行版）
+
+## A. 唯一科学问题
+
+本研究只回答一个科学问题：在 *Arabidopsis thaliana* 野生型的五类 ABA 相关胁迫公开 RNA-seq 数据中——仅纳入“可回溯到原始 FASTQ、treated-control 可配对、且可估计 contrast-level 不确定性”的样本——是否存在一个在五类处理间都稳定成立的 **shared_core genes** 集合，以及一个相对其他四类处理呈现稳定偏置的 **dehydration-biased genes** 集合；若存在，这两类基因分别落在哪些 *Arabidopsis* 特异的 TF/cistrome 与组织/细胞语境中。之所以把问题这样收紧，是因为 Shintani 2024 已经证明“ABA、盐、脱水、渗透/甘露醇、低温”可作为统一的数据宇宙，并报告了 216 个 paired datasets 下的共同与偏置响应，但其 TN-score/重叠框架并没有回答“在 effect-size 与不确定性层面稳定成立的 shared core / dehydration-biased 程序究竟是什么”。([PubMed][1])
+
+### A1. 研究目的先例验证
+
+**先例 1：10.1371/journal.pone.0203266**
+相似点：该研究直接把 *Arabidopsis* 的 drought 与 cold 放在一起，讨论“共同响应”与“特异响应”，与本研究的 shared_core / dehydration-biased 逻辑高度相近。差异点：它使用的是 29 个 microarray studies，而不是公开 RNA-seq 原始 FASTQ；处理范围也只有 drought 和 cold，不覆盖五类 ABA 相关胁迫。可接受性：可接受，因为它证明了“跨逆境共同程序 + 逆境偏置程序”本身就是独立且可发表的生物学问题，而不是方法展示。([PubMed][2])
+
+**先例 2：10.3390/ijms14047617**
+相似点：该研究明确提出了 *plant core environmental stress response genes*（PCESR），这与本研究的 shared_core 终点在生物学上直接同向。差异点：它基于 AtGenExpress 和系统性/非系统性响应框架，不是基于公开 RNA-seq 元分析，也没有把 dehydration-biased 单独设为第二终点。可接受性：可接受，因为它证明了“核心胁迫程序”可以作为 headline biological output，而不必把研究写成纯方法学文章。([PubMed][3])
+
+**先例验证结论**
+已满足“至少 2 篇研究目的相近、且非同数据重复分析”的要求，研究目的通过，不需重定义。补充地，Shintani 2024 是直接的近邻研究边界，而近年的 *Arabidopsis* 多胁迫“stress gene core”研究也说明这一问题仍然活跃，但它们在本方案中只作为边界与背景支持，不作为“先例 1/2”本身。([PubMed][1])
+
+## B. 总体大纲（单主线）
+
+先冻结研究边界：只允许 *Arabidopsis thaliana* 野生型、五类 ABA 相关胁迫、公开 RNA-seq、可回溯 raw FASTQ、treated-control 可配对、且 replicate 结构足以支持 contrast-level SE 估计的数据进入主链。然后建立公开证据链并完成 cohort freeze；再统一从原始 FASTQ 重建 gene-level 输入矩阵；随后在 study 内提取 contrast-level log2FC/SE 并编码依赖关系；再按处理类别完成依赖感知元分析；之后只做一个主判定：在跨处理层面识别 shared_core 与 dehydration-biased 两类终点；最后只用 *Arabidopsis* 专属 TF/cistrome 与组织/细胞图谱解释这两类终点，而不反向改写主结果标签。整个方案中，阈值、最小样本要求、显著性界值、稳定性界值一律写为“待细则化”。([PubMed][1])
+
+## C. 完整方案
+
+### Step 1. 研究边界冻结与停机条件写死
+
+**目标**
+把唯一科学问题落成不可漂移的纳入/排除规则，并预先定义 treatment-class 级停机条件。
+
+**输入数据来源**
+原始数据：Shintani 2024 正文与补充数据入口；旧方案文件《优化方案1.docx》。
+文件名/表名：`优化方案1.docx`；Shintani Supplementary Table 1 入口。 ([PubMed][1])
+
+**分析动作**
+冻结研究对象为：*Arabidopsis thaliana*、野生型、ABA/盐/脱水/渗透(甘露醇)/低温五类胁迫、公开 RNA-seq、raw FASTQ 可得、treated-control 可配对、可判定 replicate 结构、可稳定估计 contrast-level SE。冻结 headline outputs 为 two-set only：shared_core 与 dehydration-biased。冻结排除规则为：突变体/转基因、无对照、无原始数据、组织或时间无法补证、处理定义模糊、replicate 结构无法判定、同一生物样本重复入库且无法去重。冻结停机条件为：任一处理类别在 Step 2 完成后仍不能形成可执行 eligible contrasts，则停止主链并输出“研究目的需重定义”。所有阈值待细则化。
+
+**产出文件/表（建议表头）**
+`purpose_lock.md`：`question_id, final_question, headline_outputs, scope_freeze, no_go_rule`
+`inclusion_rulebook.tsv`：`rule_id, rule_type, definition, evidence_source, pass_criterion`
+`no_go_criteria.tsv`：`treatment_class, minimum_requirement, fail_action, downgrade_allowed`
+
+**本步骤方法依据 DOI（>=1）**
+10.3389/fpls.2024.1343787
+
+**与前一步衔接依据 DOI（>=1）+ 一句话解释**
+10.1371/journal.pone.0203266。
+解释：该研究证明“common vs specific stress response”本身可以作为独立的生物学问题，因此在进入数据层之前必须先冻结问题边界，而不是边分析边改题。([PubMed][2])
+
+**外来研究者可行性检查（公开可得性、缺失风险、降级路径）**
+边界证据本身公开可得。真正风险不在“能否读到文献”，而在后续候选 series 是否同时满足 raw FASTQ、配对对照、replicate 与元数据完整性。降级路径只有“删 study/contrast”，不允许把范围外扩到其他 abiotic stresses 来补样本。([PubMed][1])
+
+---
+
+### Step 2. 公开证据链建立与 cohort freeze
+
+**目标**
+把候选 study/run 从“文献中提到”转成“外来研究者可逐条核对、逐条下载、逐条配对”的 cohort。
+
+**输入数据来源**
+原始数据：Shintani 补充数据页；GEO/SRA series 页、sample 页、run 页；原始论文全文。
+Step 1 产物：`inclusion_rulebook.tsv`、`no_go_criteria.tsv`。
+文件名/表名：Shintani Supplementary Table 1；GSE 页面与 SRA relation 页面。([PMC][4])
+
+**分析动作**
+逐条核对 `study_id / series_id / run_id / treatment_class / tissue / time / library_type / layout / control relation / replicate structure`。把所有候选写入 `candidate_run_registry.tsv`；把能满足“可下载、可配对、可解释”的条目写入 `cohort_freeze.tsv`；把信息不全但可由 GEO 样本页或原文补证的条目标为 `recoverable`；无法补证者排除。processed matrix 只能辅助识别样本，不得作为主链纳入证据。所有阈值待细则化。
+
+**产出文件/表（建议表头）**
+`source_evidence_inventory.tsv`：`source_id, source_type, doi_or_url, study_id, run_id, tissue, treatment_type, treatment_time, library_type, raw_fastq_open, pairing_info_open, replicate_info_open, usable_flag, note`
+`candidate_run_registry.tsv`：`study_id, series_id, run_id, treatment_class, tissue_raw, time_raw, library_type, candidate_flag`
+`cohort_freeze.tsv`：`study_id, series_id, run_id, treatment_class, organ_group, time_bin, control_group_id, include_flag, exclusion_reason`
+`metadata_gap_register.tsv`：`study_id, missing_field, recoverable_flag, recovery_source, final_decision`
+
+**本步骤方法依据 DOI（>=1）**
+10.3389/fpls.2024.1343787；10.6084/m9.figshare.22566583
+
+**与前一步衔接依据 DOI（>=1）+ 一句话解释**
+10.3389/fpls.2024.1343787。
+解释：Step 1 冻结的是抽象边界，而该文及其补充表把边界落成具体的 public study/run/tissue/time 列表，因而可进入 cohort freeze。([PubMed][1])
+
+**外来研究者可行性检查（公开可得性、缺失风险、降级路径）**
+GEO 官方页面可直接核到样本、时间点、重复数、BioProject/SRA 关系；例如 GSE74864 明确给出 normal、ABA、dehydration 三条件，1 h/3 h 两时间点，每点 3 个生物学重复，并标注 “Raw data are available in SRA”。官方 GEO 页面还说明 HTS 提交包含 metadata、processed 与 raw data，且 raw files 会进入 SRA，validation 页面要求 biological information、single/paired-end、raw file 完整性等字段。与此同时，论坛层面的复用经验反复出现“processed matrix 列名与 GEO/SRA sample 映射不清”的问题，因此 processed matrix 不能作为 cohort admission 证据，只能作辅助线索。降级路径是保留“页面可核 + 文献可补”的条目，去掉其余条目；不允许凭经验补 pair_id。([NCBI][5])
+
+---
+
+### Step 3. 原始 FASTQ 重建与统一 gene-level 定量
+
+**目标**
+把冻结 cohort 的原始 reads 统一重建为全研究唯一允许使用的 gene-level 输入矩阵。
+
+**输入数据来源**
+原始数据：Step 2 纳入 run 的 raw FASTQ；统一参考转录组与注释。
+Step 2 产物：`cohort_freeze.tsv`、`source_evidence_inventory.tsv`。
+文件名/表名：`cohort_freeze.tsv`、公开 FASTQ 文件。([NCBI][6])
+
+**分析动作**
+下载 raw FASTQ；完成 reads 预处理与 QC；进行 transcript-level quantification；汇总到 gene level；生成样本主表与设计矩阵，把 `study / treatment / organ / time / pair / library / replicate / dependency_group` 回填。自本步骤起，主链只允许使用本步骤生成的 `counts_matrix.tsv / abundance_matrix.tsv / design_matrix.tsv`；外部 processed FPKM、外部 DEG 表、外部 fold change 表不得混入。所有阈值待细则化。
+
+**产出文件/表（建议表头）**
+`sample_manifest.tsv`：`sample_id, study_id, series_id, run_id, treatment_class, condition, organ_group, time_value, time_unit, time_bin, pair_id, control_group_id, library_layout, library_type, strandedness, replicate_group, raw_fastq_path, include_flag`
+`qc_summary.tsv`：`sample_id, read_count_raw, read_count_clean, qc_flag, note`
+`quant_manifest.tsv`：`sample_id, quant_file_path, reference_release, note`
+`counts_matrix.tsv`：`gene_id, sample_1, sample_2, ...`
+`abundance_matrix.tsv`：`gene_id, sample_1, sample_2, ...`
+`design_matrix.tsv`：`sample_id, study_id, treatment_class, condition, organ_group, time_bin, pair_id, control_group_id, replicate_group, dependency_group, include_flag`
+
+**本步骤方法依据 DOI（>=1）**
+10.1093/bioinformatics/bty560；10.1038/nmeth.4197；10.12688/f1000research.7563.2
+
+**与前一步衔接依据 DOI（>=1）+ 一句话解释**
+10.3389/fpls.2024.1343787。
+解释：Step 2 已把每个 run 的处理类别、组织、时间与库类型冻结，因此 Step 3 才能把这些 public runs 统一重建成同一坐标系下的 gene-level 输入。([PubMed][7])
+
+**外来研究者可行性检查（公开可得性、缺失风险、降级路径）**
+官方 GEO/NCBI 规则与数据共享实践都表明 raw FASTQ 与 processed data 可以同时存在；但本研究主链只吃 raw FASTQ。风险在于个别 raw 文件可能损坏、撤回或与元数据不一致。官方 validation 也明确把 decompression error、file truncation、invalid gz、duplicate raw file names 视为常见问题。降级路径只有“删 run/删 pair，不用 processed matrix 代替 raw FASTQ”。([NCBI][8])
+
+---
+
+### Step 4. study 内 contrast-level 效应量提取与依赖编码
+
+**目标**
+在统一矩阵上构造可比 contrasts，输出每个 contrast 的 gene-level `log2FC / SE`，并显式编码非独立性。
+
+**输入数据来源**
+Step 3 产物：`counts_matrix.tsv`、`design_matrix.tsv`、`sample_manifest.tsv`。
+
+**分析动作**
+按 `study_id + treatment_class + organ_group + time_bin + control_group_id` 构造 eligible contrasts；进行 study 内差异表达建模，导出 `log2fc, se, stat, pval, padj, base_mean`；同步编码 `shared_control_id, same_protocol_block, nearby_time_block, organ_group` 等依赖标签。对 replicate 结构不足、或不能稳定估计 SE 的 contrast，直接标记为 `ineligible`，不得进入元分析主链。所有阈值待细则化。
+
+**产出文件/表（建议表头）**
+`contrast_manifest.tsv`：`contrast_id, study_id, treatment_class, organ_group, time_bin, control_group_id, n_treat, n_control, shared_control_id, same_protocol_block, nearby_time_block, eligibility, exclusion_reason`
+`gene_effects.tsv`：`gene_id, contrast_id, study_id, treatment_class, organ_group, time_bin, log2fc, se, stat, pval, padj, base_mean, direction`
+`dependency_map.tsv`：`contrast_id, study_id, shared_control_id, same_protocol_block, nearby_time_block, dependency_group`
+`eligible_contrasts.tsv`：`contrast_id, treatment_class, inclusion_status, reason`
+
+**本步骤方法依据 DOI（>=1）**
+10.1186/s13059-014-0550-8
+
+**与前一步衔接依据 DOI（>=1）+ 一句话解释**
+10.12688/f1000research.7563.2。
+解释：tximport 论文明确支持从 transcript-level abundance 汇总到可进入 gene-level differential analysis 的输入，因此 Step 3 产物可直接承接到 Step 4。([PubMed][9])
+
+**外来研究者可行性检查（公开可得性、缺失风险、降级路径）**
+本步骤不新增外部数据，风险主要是部分 study 虽有 FASTQ，但 replicate 或配对对照不足，导致 SE 不稳定。降级路径是剔除该 contrast，而不是人为给 SE 赋值，也不是把“只有 fold change、没有方差”的条目混入主链。([PubMed][9])
+
+---
+
+### Step 5. treatment class 内依赖感知元分析
+
+**目标**
+在每个处理类别内部，把多个 dependent contrasts 合成为 gene-level pooled treatment effect，并完成稳定性筛查。
+
+**输入数据来源**
+Step 4 产物：`gene_effects.tsv`、`dependency_map.tsv`、`eligible_contrasts.tsv`。
+
+**分析动作**
+按 treatment class 分别对每个 gene 建立三层或等价的依赖感知随机效应模型；主模型反映 `study` 与 `contrast` 的嵌套，敏感性分析显式处理 `shared control` 与 `nearby time` 依赖；输出 `pooled_log2fc, ci_low, ci_high, tau2, i2, p_meta, padj_meta` 与稳健性标记。仅保留在 leave-one-study-out 与 dependence sensitivity 下方向不翻转的基因进入 Step 6。所有阈值待细则化。
+
+**产出文件/表（建议表头）**
+`meta_effects_by_treatment.tsv`：`gene_id, treatment_class, k_studies, k_contrasts, pooled_log2fc, ci_low, ci_high, tau2, i2, p_meta, padj_meta, keep_flag`
+`meta_robustness.tsv`：`gene_id, treatment_class, loo_flip_flag, influence_flag, dependence_sensitivity_flag, final_keep_flag`
+`heterogeneity_summary.tsv`：`treatment_class, moderator, summary_stat, interpretation_note`
+
+**本步骤方法依据 DOI（>=1）**
+10.18637/jss.v036.i03；10.3758/s13428-012-0261-6；10.1002/jrsm.5
+
+**与前一步衔接依据 DOI（>=1）+ 一句话解释**
+10.3758/s13428-012-0261-6。
+解释：Step 4 已经把 effect size 与依赖标签显式写出，因此 Step 5 能在“不假装独立”的前提下完成 pooled treatment effect 估计。([Journal of Statistical Software][10])
+
+**外来研究者可行性检查（公开可得性、缺失风险、降级路径）**
+本步骤不新增外部数据。最大风险是依赖结构只能部分恢复，不能精确重建完整协方差。降级路径不是把 dependent effects 当成独立样本，而是采用更保守的三层模型/稳健方差表达不确定性；若某处理类别在主要稳健性检查下大面积翻转，则不得进入 Step 6。([PubMed][11])
+
+---
+
+### Step 6. 跨处理 shared_core 与 dehydration-biased 判定
+
+**目标**
+把五类处理的 pooled effects 统一到一个 `gene × five-treatment` 矩阵中，只产出两类主结果：shared_core 与 dehydration-biased。
+
+**输入数据来源**
+Step 5 产物：`meta_effects_by_treatment.tsv`、`meta_robustness.tsv`。
+
+**分析动作**
+构建 `gene × five-treatment pooled effect matrix`。shared_core 的定义固定为：五类处理内方向一致、都有稳健支持、且在敏感性分析中不翻转。dehydration-biased 的定义固定为：脱水处理稳健成立，且其效应强度或稳定性相对其他四类表现出偏置，但不满足 shared_core。所有不满足这两类定义的基因统一进入背景表，不再扩展第三类 headline result。所有判定界值待细则化。
+
+**产出文件/表（建议表头）**
+`cross_treatment_effect_matrix.tsv`：`gene_id, aba_effect, salt_effect, dehydration_effect, mannitol_effect, cold_effect, shared_core_flag, dehydration_biased_flag`
+`shared_core_genes.tsv`：`gene_id, direction_code, support_count, robustness_note`
+`dehydration_biased_genes.tsv`：`gene_id, dehydration_pattern_code, comparator_note, robustness_note`
+`ambiguous_background.tsv`：`gene_id, non_headline_reason`
+
+**本步骤方法依据 DOI（>=1）**
+10.1371/journal.pone.0203266；10.3390/ijms14047617
+
+**与前一步衔接依据 DOI（>=1）+ 一句话解释**
+10.1371/journal.pone.0203266。
+解释：该研究的 biological endpoint 正是“common vs specific”，因此 Step 5 的 pooled treatment effects 合成为 Step 6 的 shared_core / dehydration-biased 判定是有先例支撑的。([PubMed][2])
+
+**外来研究者可行性检查（公开可得性、缺失风险、降级路径）**
+本步骤不引入新数据，风险只在最终标签是否稳定。降级路径为：凡在 leave-one-study-out 或 dependence sensitivity 下出现翻转的基因，一律退入 `ambiguous_background.tsv`，不得进入 headline gene sets。([PubMed][2])
+
+---
+
+### Step 7. 机制解释：TF/cistrome 与组织/细胞类型定位
+
+**目标**
+在不改动 Step 6 分类结果的前提下，只对 shared_core 与 dehydration-biased 两类结果进行上游调控与组织/细胞语境解释。
+
+**输入数据来源**
+Step 6 产物：`shared_core_genes.tsv`、`dehydration_biased_genes.tsv`、`cross_treatment_effect_matrix.tsv`。
+原始数据：Arabidopsis DAP-seq 目标集、ChIP-Hub、Arabidopsis developmental atlas、Arabidopsis root/above-ground 单细胞图谱、Arabidopsis life-cycle atlas；若需要叶片干旱专属语境，再调用 drought leaf atlas。([PubMed][12])
+
+**分析动作**
+分别对 shared_core 与 dehydration-biased 做 *Arabidopsis*-specific TF-target enrichment；先做“gene set → upstream TF”优先级排序，再用 DAP-seq 与 ChIP-Hub 交叉排序；组织/细胞语境上，先投影到 life-cycle / developmental atlas，若需要更细根、地上部或叶片干旱信息，再分别投影到 root atlas、above-ground atlas 或 drought leaf atlas。单细胞/单核图谱只用于生成 `support_tier` 与语境解释，不得反向修改 shared_core 或 dehydration-biased 标签。所有阈值待细则化。
+
+**产出文件/表（建议表头）**
+`tf_prioritization.tsv`：`set_label, tf_id, source_db, overlap_n, enrich_p, padj, dap_support, chip_support, rank`
+`cell_context_mapping.tsv`：`set_label, atlas_source, organ, celltype_id, celltype_name, score, support_tier, note`
+`candidate_master_table.tsv`：`gene_id, class_label, pooled_pattern, top_tf_candidates, top_cell_context, evidence_tier`
+
+**本步骤方法依据 DOI（>=1）**
+10.1016/j.cell.2016.04.038；10.1038/s41467-022-30770-1；10.1111/tpj.13312；10.1016/j.devcel.2022.01.008；10.1093/plphys/kiab537；10.1038/s41477-025-02072-z
+
+**与前一步衔接依据 DOI（>=1）+ 一句话解释**
+10.1016/j.cell.2016.04.038。
+解释：Step 6 已经固定了目标 gene sets，DAP-seq/ChIP-Hub 这类 *Arabidopsis* TF-binding 资源适合用于“既定基因集的上游解释”，而不是回去改写分类。([PubMed][12])
+
+**外来研究者可行性检查（公开可得性、缺失风险、降级路径）**
+这些资源均有公开论文或公共入口。风险不是资源不存在，而是 atlas 与 bulk stress 的组织/时间背景不完全匹配。降级路径是优先用 coverage 最大的 life-cycle/developmental atlas 给出 organ-level 语境；若更细粒度 atlas 与主链背景不完全贴合，则把该证据降为 `support_tier = medium/low`，只保留解释功能，不触动 Step 6 主结论。([Nature][13])
+
+## D. 主线一致性自检（证明非方法学主导）
+
+这份方案不是“为了做元分析、做单细胞映射、做 TF 富集而拼方法”，而是从一开始就把问题限定为：五类 ABA 相关胁迫中，哪些基因构成 **shared_core**，哪些基因构成 **dehydration-biased**。Step 1–2 只负责把问题边界变成可执行 cohort；Step 3–5 只负责得到可信的 treatment-level effect；Step 6 是唯一的主结果判定位点；Step 7 被明确限制为解释层，不得回写标签。这样，方法只是服务于一个生物学问题，而不是反过来支配问题。这个收口方式也比旧方案更能避免被审稿人误判为“统计流程升级稿”。 ([SAGE Publishing][14])
+
+## E. 旧方案缺陷 -> 新方案修复映射表
+
+| 旧方案缺陷                                                                  | 新方案修复                                                                                           |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 先例验证写在前面，但“必须非同数据重复分析”这一层没有写硬                                          | 只把 Sharma 2018 与 Hahn 2013 作为 A1 正式先例；Shintani 2024 只作边界与近邻研究，不算先例                              |
+| Step 7 资源堆得较满，容易被误读成第二主线                                               | 明确规定 Step 7 仅解释，不得改写 Step 6 分类                                                                  |
+| 已提出 raw FASTQ / pair / replicate / SE 门槛，但 cohort admission 还不够“页面级硬核” | Step 2 要求 GEO/SRA 页面级核对 + 原文补证；processed matrix 不能作为纳入证据                                        |
+| 提到依赖感知元分析，但不稳定候选仍可能混入 headline results                                 | Step 5–6 增加 leave-one-study-out 与 dependence sensitivity 双门槛；翻转者全部退入 `ambiguous_background.tsv` |
+| 旧方案文件里近年资源很多，但没有分清“主结论必需证据”和“解释层可选证据”                                  | 新方案把 Shintani/GEO/SRA/方法 DOI 放到主链核心，把 atlas/leaf drought 资源限定在 Step 7 解释层                       |
+| 文件输出较多，但 treatment-class 失败时的停机机制不够刚                                   | Step 1 直接写入 no-go rule；Step 2 若任一处理类别无法形成 eligible contrasts，则停止正文主链                            |
+
+这些修复点直接来自旧方案文本，并且专门针对当前最常见的 AI 文稿审稿红旗与公共数据复用风险：幻觉引文、逻辑链断裂、空泛但顺滑的表述、以及 processed matrix 与 sample mapping 含糊。 ([SAGE Publishing][14])
+
+## F. 证据清单（DOI/URL + 用途 + 检索日期）
+
+1. DOI：10.3389/fpls.2024.1343787
+   用途：界定五类 ABA-related stress 的直接研究边界；确认 216 paired datasets 与近邻研究背景。
+   检索日期：2026-03-28。([PubMed][1])
+
+2. DOI：10.6084/m9.figshare.22566583
+   用途：Shintani 补充数据入口；用于提取候选 study/run/treatment/tissue/time。
+   检索日期：2026-03-28。([Figshare][15])
+
+3. URL：`https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74864`
+   用途：页面级核验 raw data、时间点、处理条件、biological replicates 与 SRA relation。
+   检索日期：2026-03-28。([NCBI][5])
+
+4. URL：`https://www.ncbi.nlm.nih.gov/geo/info/seq.html`
+   用途：确认 GEO 处理 metadata、processed data 与 raw data，并将 raw data 提交到 SRA。
+   检索日期：2026-03-28。([NCBI][6])
+
+5. URL：`https://www.ncbi.nlm.nih.gov/geo/info/validation.html`
+   用途：确认 GEO 对 metadata completeness、raw FASTQ integrity、single/paired-end 与 biological information 的校验要求。
+   检索日期：2026-03-28。([NCBI][8])
+
+6. DOI：10.1371/journal.pone.0203266
+   用途：A1 先例 1；也支持 Step 6 的 common vs specific biological endpoint。
+   检索日期：2026-03-28。([PubMed][2])
+
+7. DOI：10.3390/ijms14047617
+   用途：A1 先例 2；支持 shared_core / PCESR 终点。
+   检索日期：2026-03-28。([PubMed][3])
+
+8. DOI：10.1093/bioinformatics/bty560
+   用途：FASTQ 预处理。
+   检索日期：2026-03-28。([PubMed][7])
+
+9. DOI：10.1038/nmeth.4197
+   用途：transcript-level quantification。
+   检索日期：2026-03-28。([PubMed][16])
+
+10. DOI：10.12688/f1000research.7563.2
+    用途：transcript-to-gene 汇总与 gene-level downstream input。
+    检索日期：2026-03-28。([PubMed][17])
+
+11. DOI：10.1186/s13059-014-0550-8
+    用途：study 内差异表达与 effect size 提取。
+    检索日期：2026-03-28。([PubMed][9])
+
+12. DOI：10.18637/jss.v036.i03
+    用途：元分析实现。
+    检索日期：2026-03-28。([Journal of Statistical Software][10])
+
+13. DOI：10.3758/s13428-012-0261-6
+    用途：三层元分析处理 dependent effect sizes。
+    检索日期：2026-03-28。([PubMed][11])
+
+14. DOI：10.1002/jrsm.5
+    用途：稳健方差估计处理 dependent effect sizes。
+    检索日期：2026-03-28。([PubMed][18])
+
+15. DOI：10.1016/j.cell.2016.04.038
+    用途：Arabidopsis DAP-seq cistrome。
+    检索日期：2026-03-28。([PubMed][12])
+
+16. DOI：10.1038/s41467-022-30770-1
+    用途：ChIP-Hub plant regulome。
+    检索日期：2026-03-28。([PubMed][19])
+
+17. DOI：10.1111/tpj.13312
+    用途：Arabidopsis developmental transcriptome atlas。
+    检索日期：2026-03-28。([PubMed][20])
+
+18. DOI：10.1016/j.devcel.2022.01.008
+    用途：Arabidopsis root single-cell atlas。
+    检索日期：2026-03-28。([PubMed][21])
+
+19. DOI：10.1093/plphys/kiab537
+    用途：Arabidopsis shoot/root single-cell atlas。
+    检索日期：2026-03-28。([PubMed][22])
+
+20. DOI：10.1038/s41477-025-02072-z
+    用途：Arabidopsis life-cycle single-nucleus + spatial atlas。
+    检索日期：2026-03-28。([Nature][13])
+
+21. DOI：10.1038/s41477-026-02254-3
+    用途：叶片干旱专属语境的最新单核/空间 atlas，可作 Step 7 叶片解释层资源。
+    检索日期：2026-03-28。([Nature][23])
+
+22. DOI：10.1038/s41598-023-41032-5
+    用途：学术论文层面验证“fabricated bibliographic citations”是 AI 文稿的真实风险。
+    检索日期：2026-03-28。([PMC][24])
+
+23. DOI：10.1016/j.jds.2025.10.024
+    用途：近年的编辑/作者视角证据，支持“AI 假引文与错误元数据”已成为期刊处理的现实问题。
+    检索日期：2026-03-28。([PubMed][25])
+
+24. URL：`https://www.sagepub.com/explore-our-content/blogs/posts/sage-perspectives/2025/06/11/ai-detection-for-peer-reviewers-look-out-for-red-flags`
+    用途：出版方博客；用于识别 AI 稿件红旗，如空泛 prose、错误 DOI、phantom references。
+    检索日期：2026-03-28。([SAGE Publishing][14])
+
+25. URL：`https://blogs.library.duke.edu/blog/2023/03/09/chatgpt-and-fake-citations/`
+    用途：图书馆博客；用于识别“听起来像真的但实际上不存在”的引文风险。
+    检索日期：2026-03-28。([Duke University Libraries Blogs][26])
+
+26. URL：`https://becker.wustl.edu/news/tips-for-submitting-rna-seq-data-to-geo/`
+    用途：实务博客；用于确认 RNA-seq GEO 提交中 raw FASTQ 与 processed files 并存的现实格式。
+    检索日期：2026-03-28。([Becker Medical Library][27])
+
+27. URL：`https://www.reddit.com/r/bioinformatics/comments/xzpkpr/how_to_link_sample_ids_to_geo_accession_ids_for/`
+    用途：论坛证据；用于识别 processed matrix 列名含糊、sample mapping 不清的数据复用风险。
+    检索日期：2026-03-28。
+    说明：仅用于风险识别，不作为方法依据。([Reddit][28])
+
+28. URL：`https://www.reddit.com/r/PhD/comments/1ov584p/ai_content_flooding_journals_reviewed_8_papers/`
+    用途：论坛证据；用于识别审稿人实际遭遇的 AI 稿件症状：generic introduction、recent literature 脱节、method 不通、假引文。
+    检索日期：2026-03-28。
+    说明：仅用于风险识别，不作为方法依据。([Reddit][29])
+
+你若需要，我下一条就把这份方案再压成“开题答辩版 1 页摘要”。
+
+[1]: https://pubmed.ncbi.nlm.nih.gov/38584943/ "Meta-analysis of public RNA sequencing data of abscisic acid-related abiotic stresses in Arabidopsis thaliana - PubMed"
+[2]: https://pubmed.ncbi.nlm.nih.gov/30192796/ "Comparative transcriptome meta-analysis of Arabidopsis thaliana under drought and cold stress - PubMed"
+[3]: https://pubmed.ncbi.nlm.nih.gov/23567274/ "Plant core environmental stress response genes are systemically coordinated during abiotic stresses - PubMed"
+[4]: https://pmc.ncbi.nlm.nih.gov/articles/PMC10995227/?utm_source=chatgpt.com "Meta-analysis of public RNA sequencing data of abscisic acid ..."
+[5]: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74864 "
+    GEO Accession viewer
+    "
+[6]: https://www.ncbi.nlm.nih.gov/geo/info/seq.html "Submitting high-throughput sequence data to GEO - GEO - NCBI"
+[7]: https://pubmed.ncbi.nlm.nih.gov/30423086/?utm_source=chatgpt.com "fastp: an ultra-fast all-in-one FASTQ preprocessor"
+[8]: https://www.ncbi.nlm.nih.gov/geo/info/validation.html "GEO Submission Validation - GEO - NCBI"
+[9]: https://pubmed.ncbi.nlm.nih.gov/25516281/?utm_source=chatgpt.com "Moderated estimation of fold change and dispersion for RNA ..."
+[10]: https://www.jstatsoft.org/v36/i03/?utm_source=chatgpt.com "Conducting Meta-Analyses in R with the metafor Package"
+[11]: https://pubmed.ncbi.nlm.nih.gov/23055166/?utm_source=chatgpt.com "Three-level meta-analysis of dependent effect sizes"
+[12]: https://pubmed.ncbi.nlm.nih.gov/27203113/?utm_source=chatgpt.com "Cistrome and Epicistrome Features Shape the ... - PubMed - NIH"
+[13]: https://www.nature.com/articles/s41477-025-02072-z "A single-cell, spatial transcriptomic atlas of the Arabidopsis life cycle | Nature Plants"
+[14]: https://www.sagepub.com/explore-our-content/blogs/posts/sage-perspectives/2025/06/11/ai-detection-for-peer-reviewers-look-out-for-red-flags "AI detection for peer reviewers: Look out for red flags"
+[15]: https://figshare.com/articles/dataset/Meta-Analysis_of_Public_RNA_Sequencing_Data_of_Multiple_Abiotic_Stresses_in_Arabidopsis_thaliana_Provides_New_Insights_into_both_ABA-Dependent_and_ABA-Independent_Stress_Responsive_Genes/22566583?utm_source=chatgpt.com "Meta-Analysis of Public RNA Sequencing Data of Abscisic Acid- ..."
+[16]: https://pubmed.ncbi.nlm.nih.gov/28263959/?utm_source=chatgpt.com "Salmon Provides Fast and Bias-Aware Quantification of ..."
+[17]: https://pubmed.ncbi.nlm.nih.gov/26925227/?utm_source=chatgpt.com "Differential analyses for RNA-seq: transcript-level estimates ..."
+[18]: https://pubmed.ncbi.nlm.nih.gov/26056092/?utm_source=chatgpt.com "Robust variance estimation in meta-regression with ..."
+[19]: https://pubmed.ncbi.nlm.nih.gov/35701419/?utm_source=chatgpt.com "ChIP-Hub provides an integrative platform for exploring ..."
+[20]: https://pubmed.ncbi.nlm.nih.gov/27549386/?utm_source=chatgpt.com "A high resolution map of the Arabidopsis thaliana ..."
+[21]: https://pubmed.ncbi.nlm.nih.gov/35134336/ "A single-cell Arabidopsis root atlas reveals developmental trajectories in wild-type and cell identity mutants - PubMed"
+[22]: https://pubmed.ncbi.nlm.nih.gov/34850215/ "Shoot and root single cell sequencing reveals tissue- and daytime-specific transcriptome profiles - PubMed"
+[23]: https://www.nature.com/articles/s41477-026-02254-3?utm_source=chatgpt.com "Stress drives plasticity in leaf ageing transcriptional ..."
+[24]: https://pmc.ncbi.nlm.nih.gov/articles/PMC10484980/?utm_source=chatgpt.com "Fabrication and errors in the bibliographic citations generated ..."
+[25]: https://pubmed.ncbi.nlm.nih.gov/41585192/?utm_source=chatgpt.com "Fabricated citations in the age of AI: A wake-up call for ..."
+[26]: https://blogs.library.duke.edu/blog/2023/03/09/chatgpt-and-fake-citations/ "ChatGPT and Fake Citations - Duke University Libraries Blogs"
+[27]: https://becker.wustl.edu/news/tips-for-submitting-rna-seq-data-to-geo/ "Tips for Submitting RNA-seq Data to GEO  – Becker Medical Library"
+[28]: https://www.reddit.com/r/bioinformatics/comments/xzpkpr/how_to_link_sample_ids_to_geo_accession_ids_for/ "How to link sample IDs to GEO_Accession IDs for analysis of differential gene expression (RNAseq)? : r/bioinformatics"
+[29]: https://www.reddit.com/r/PhD/comments/1ov584p/ai_content_flooding_journals_reviewed_8_papers/ "AI content flooding journals, reviewed 8 papers this month and 5 were clearly fake : r/PhD"
