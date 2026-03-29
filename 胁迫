@@ -1,6 +1,6 @@
 A. 唯一科学问题
 
-在 Arabidopsis thaliana 野生型的五类 ABA 相关胁迫公开 RNA-seq 数据中，仅纳入“可回溯原始 FASTQ、treated-control 可配对、且能估计 contrast-level 不确定性”的样本，是否存在一个在五类处理间都稳定成立的 shared_core genes 集合，以及一个相对其余四类处理表现出稳定偏置的 dehydration-biased genes 集合；若存在，这两类基因分别落在哪些 Arabidopsis 特异 TF/cistrome 与组织/细胞语境中。近邻研究已在五类 ABA 相关胁迫的 216 个 paired datasets 上完成 TN-score 式整合，但尚未把“效应量 + 不确定性 + 依赖结构”作为主链去界定稳定 shared core 与 dehydration bias，因此本方案的问题边界成立，且不等同于其重复分析。 
+在 *Arabidopsis thaliana* 野生型的五类 ABA 相关胁迫公开 RNA-seq 数据中，仅纳入“可回溯原始 FASTQ、treated-control 可配对、且能估计 contrast-level 不确定性”的样本，是否存在一个在五类处理间都稳定成立的 shared_core genes 集合，以及一个相对其余四类处理表现出稳定偏置的 dehydration-biased genes 集合；若存在，这两类基因分别落在哪些 Arabidopsis 特异 TF/cistrome 与组织/细胞语境中。近邻研究已在五类 ABA 相关胁迫的 216 个 paired datasets 上完成 TN-score 式整合，但尚未把“效应量 + 不确定性 + 依赖结构”作为主链去界定稳定 shared core 与 dehydration bias，因此本方案的问题边界成立，且不等同于其重复分析。
 
 A1. 研究目的先例验证
 
@@ -8,7 +8,7 @@ A1. 研究目的先例验证
 
 DOI：10.1371/journal.pone.0203266
 
-相似点：直接回答“共同响应”与“特异响应”这一生物学问题，且对象同为 Arabidopsis 逆境转录响应。
+相似点：直接回答“共同响应”与“特异响应”这一生物学问题，且对象同为 *Arabidopsis* 逆境转录响应。
 
 差异点：该研究基于 29 个 microarray studies，仅覆盖 drought 与 cold，不是五类 ABA 相关胁迫，也不是从公开 RNA-seq 原始 FASTQ 重建统一输入矩阵。
 
@@ -30,7 +30,7 @@ DOI：10.3390/ijms14047617
 
 B. 总体大纲
 
-先冻结问题边界，只允许 Arabidopsis thaliana 野生型、五类 ABA 相关胁迫、公开 RNA-seq、原始 FASTQ 可得、treated-control 可配对、且 replicate 结构足以支持 contrast-level 不确定性估计的数据进入主链；随后建立公开证据链并完成 cohort freeze；再从原始 FASTQ 统一重建 gene-level 输入矩阵；接着在 study 内提取 contrast-level log2FC 与 SE 并编码非独立性；之后在处理类别内完成依赖感知元分析；再只做一个主判定，即 shared_core 与 dehydration-biased 两类终点；最后仅用 Arabidopsis 专属 TF/cistrome 与组织/细胞图谱解释这两类终点，解释层不得回写主结果标签。
+先冻结问题边界，只允许 *Arabidopsis thaliana* 野生型、五类 ABA 相关胁迫、公开 RNA-seq、原始 FASTQ 可得、treated-control 可配对、且 replicate 结构足以支持 contrast-level 不确定性估计的数据进入主链；随后建立公开证据链并完成 cohort freeze；再从原始 FASTQ 统一重建 gene-level 输入矩阵；接着在 study 内提取 contrast-level log2FC 与 SE 并编码非独立性；之后在处理类别内完成依赖感知元分析；再只做一个主判定，即 shared_core 与 dehydration-biased 两类终点；最后仅用 *Arabidopsis* 专属 TF/cistrome 与组织/细胞图谱解释这两类终点，解释层不得回写主结果标签。
 
 C. 完整方案（Step 1..7）
 
@@ -48,7 +48,7 @@ Step 1. 研究边界冻结与停机条件写死
 
 分析动作
 
-冻结研究对象为：Arabidopsis thaliana、野生型、ABA/盐/脱水/渗透（甘露醇）/低温五类胁迫、公开 RNA-seq、raw FASTQ 可得、treated-control 可配对、replicate 结构可判定、可稳定估计 contrast-level SE。
+冻结研究对象为：*Arabidopsis thaliana*、野生型、ABA/盐/脱水/渗透（甘露醇）/低温五类胁迫、公开 RNA-seq、raw FASTQ 可得、treated-control 可配对、replicate 结构可判定、可稳定估计 contrast-level SE。
 
 冻结 headline outputs 为 two-set only：shared_core 与 dehydration_biased。
 
@@ -386,7 +386,7 @@ candidate_master_table.tsv：gene_id | class_label | pooled_pattern | top_tf_can
 
 10.1016/j.cell.2016.04.038
 
-衔接理由：Step 6 已固定目标 gene sets，DAP-seq 与 ChIP-Hub 这类 Arabidopsis TF-binding 资源适合用于既定基因集的上游解释，而不是回写分类。
+衔接理由：Step 6 已固定目标 gene sets，DAP-seq 与 ChIP-Hub 这类 *Arabidopsis* TF-binding 资源适合用于既定基因集的上游解释，而不是回写分类。
 
 外来研究者可行性检查
 
@@ -419,24 +419,6 @@ E. 缺陷修复映射表
 | 结果标签与解释资源之间可能互相污染                           | 解释图谱只生成 support_tier 与语境说明，不得反向改变 headline gene sets                                                               |
 | 近邻研究边界与方法依据层级仍不够清楚                          | A 与 A1 明确区分近邻研究、研究目的先例、方法依据与解释资源的层级位置                                                                              |
 
-补充：最新专栏/博客/论坛证据小表
-
-以下小表用于补足“AI 生成方案常见缺陷/审稿风险识别”的近期外围证据，重点覆盖披露不足、假参考文献、AI 生成评论/评审异常、评审环节过度依赖 AI，以及人工复核必要性。([Elsevier Author Services - Articles][1])
-
-| URL                                                                                                                                | 用途                                                 | 检索日期       | 核验状态 |
-| ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------- | ---- |
-| `https://www.springernature.com/gp/librarians/the-link/open-science-blogpost/research-integrity-open-access-ai-france/27849204`    | 用于识别“AI 参与写作/编辑后仍需人工把关，且存在作者身份、可重复表述与伦理边界风险”的审稿关注点 | 2026-03-28 | 已核验  |
-| `https://retractionwatch.com/2026/01/28/medical-journal-publishes-a-paper-on-ai-with-a-fake-reference-to-itself/`                  | 用于识别“AI 辅助格式化或写作导致假参考文献/不存在参考文献”的高风险缺陷             | 2026-03-28 | 已核验  |
-| `https://scholarlykitchen.sspnet.org/2025/09/17/peer-review-in-the-era-of-ai-risks-rewards-and-responsibilities/`                  | 用于识别“评审环节过度依赖 AI、偏见强化、透明度不足、prompt injection”等审稿风险 | 2026-03-28 | 已核验  |
-| `https://scholarlykitchen.sspnet.org/2025/08/25/from-detection-to-disclosure-key-takeaways-on-ai-ethics-from-copes-forum/`         | 用于识别“AI 检测工具误判、未披露使用、上传未公开稿件至外部 AI 平台”等常见合规缺陷      | 2026-03-28 | 已核验  |
-| `https://retractionwatch.com/2025/02/10/as-springer-nature-journal-clears-ai-papers-one-universitys-retractions-rise-drastically/` | 用于识别“短期集中、模板化、未披露 LLM 生成文本导致编辑警觉与撤稿”的风险信号          | 2026-03-28 | 已核验  |
-
-核验口径说明（3行以内）
-
-可访问性核验：页面当前可打开，且能定位到支撑本方案使用场景的核心信息。
-用途匹配核验：证据所承载的信息与本方案中的具体用途一一对应，不以泛泛政策说明替代具体风险识别。
-时间有效性核验：主链资源以当前可用版本为准，外围专栏/博客/论坛优先补入 2025–2026 的近期来源。([Retraction Watch][2])
-
 F. 证据清单（去重后，含“已核验/待核验”列）
 
 DOI 证据
@@ -461,19 +443,20 @@ DOI 证据
 
 网页证据
 
-| URL                                                                                                                                                            | 用途                                                                          | 检索日期       | 核验状态 |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------- | ---- |
-| `https://figshare.com/articles/dataset/Meta-Analysis_of_Public_RNA_Sequencing_Data_of_Abscisic_Acid-Related_Abiotic_Stresses_in_Arabidopsis_thaliana/22566583` | Step 2 候选 study/run/treatment/tissue/time 页面级入口                             | 2026-03-28 | 已核验  |
-| `https://www.ncbi.nlm.nih.gov/geo/info/faq.html`                                                                                                               | Step 2 确认 GEO 要求 raw data、processed data 和 metadata，且 HTS raw files 关联到 SRA | 2026-03-28 | 已核验  |
-| `https://www.ncbi.nlm.nih.gov/geo/info/validation.html`                                                                                                        | Step 2 确认 FASTQ 完整性与格式校验要求                                                  | 2026-03-28 | 已核验  |
-| `https://www.ncbi.nlm.nih.gov/geo/info/seq.html`                                                                                                               | Step 2 确认 GEO 的 raw/processed/metadata 提交与关联规则                              | 2026-03-28 | 已核验  |
-| `https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74864`                                                                                                  | Step 2 页面级示例，用于核验 normal、ABA、dehydration 条件、时间点与 SRA 关系                     | 2026-03-28 | 已核验  |
-| `https://scientific-publishing.webshop.elsevier.com/research-process/the-dangers-of-ai-assisted-academic-writing/`                                             | 补充识别“AI 辅助写作并不转移作者责任，且事实/表述错误仍由作者承担”的常见缺陷                                   | 2026-03-28 | 已核验  |
-| `https://www.springernature.com/gp/librarians/the-link/open-science-blogpost/research-integrity-open-access-ai-france/27849204`                                | 补充识别“AI 使用中的作者身份、伦理边界与人工复核必要性”                                              | 2026-03-28 | 已核验  |
-| `https://scholarlykitchen.sspnet.org/2025/08/25/from-detection-to-disclosure-key-takeaways-on-ai-ethics-from-copes-forum/`                                     | 补充识别“AI 检测误判、未披露使用、外部平台保密性风险”                                               | 2026-03-28 | 已核验  |
-| `https://scholarlykitchen.sspnet.org/2025/09/17/peer-review-in-the-era-of-ai-risks-rewards-and-responsibilities/`                                              | 补充识别“AI 介入评审后的偏见、过度依赖与 prompt injection 风险”                                 | 2026-03-28 | 已核验  |
-| `https://retractionwatch.com/2025/02/10/as-springer-nature-journal-clears-ai-papers-one-universitys-retractions-rise-drastically/`                             | 补充识别“模板化 AI 文本、未披露 LLM 使用、集中提交异常”                                           | 2026-03-28 | 已核验  |
-| `https://retractionwatch.com/2026/01/28/medical-journal-publishes-a-paper-on-ai-with-a-fake-reference-to-itself/`                                              | 补充识别“AI 造成假参考文献/引用链断裂”的直接案例                                                 | 2026-03-28 | 已核验  |
+| URL                                                                                                                                                                                                                                                                                                                          | 用途                                                                          | 检索日期       | 核验状态 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------- | ---- |
+| [https://figshare.com/articles/dataset/Meta-Analysis_of_Public_RNA_Sequencing_Data_of_Abscisic_Acid-Related_Abiotic_Stresses_in_Arabidopsis_thaliana/22566583](https://figshare.com/articles/dataset/Meta-Analysis_of_Public_RNA_Sequencing_Data_of_Abscisic_Acid-Related_Abiotic_Stresses_in_Arabidopsis_thaliana/22566583) | Step 2 候选 study/run/treatment/tissue/time 页面级入口                             | 2026-03-28 | 已核验  |
+| [https://www.ncbi.nlm.nih.gov/geo/info/faq.html](https://www.ncbi.nlm.nih.gov/geo/info/faq.html)                                                                                                                                                                                                                             | Step 2 确认 GEO 要求 raw data、processed data 和 metadata，且 HTS raw files 关联到 SRA | 2026-03-28 | 已核验  |
+| [https://www.ncbi.nlm.nih.gov/geo/info/validation.html](https://www.ncbi.nlm.nih.gov/geo/info/validation.html)                                                                                                                                                                                                               | Step 2 确认 FASTQ 完整性与格式校验要求                                                  | 2026-03-28 | 已核验  |
+| [https://www.ncbi.nlm.nih.gov/geo/info/seq.html](https://www.ncbi.nlm.nih.gov/geo/info/seq.html)                                                                                                                                                                                                                             | Step 2 确认 GEO 的 raw/processed/metadata 提交与关联规则                              | 2026-03-28 | 已核验  |
+| [https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74864](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74864)                                                                                                                                                                                                   | Step 2 页面级示例，用于核验 normal、ABA、dehydration 条件、时间点与 SRA 关系                     | 2026-03-28 | 已核验  |
 
-[1]: https://scientific-publishing.webshop.elsevier.com/research-process/the-dangers-of-ai-assisted-academic-writing/ "The Risks of AI-Assisted Academic Writing | Elsevier"
-[2]: https://retractionwatch.com/2025/02/10/as-springer-nature-journal-clears-ai-papers-one-universitys-retractions-rise-drastically/ "As Springer Nature journal clears AI papers, one university’s retractions rise drastically – Retraction Watch"
+### 专栏/博客/论坛证据（最新）
+
+| URL                                                                                                                                                                                                                                                                                                | 来源类型（专栏/博客/论坛） | 用途（AI方案缺陷或审稿风险）                                                                      | 检索日期       | 核验状态 |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------ | ---------- | ---- |
+| [https://www.timeshighereducation.com/opinion/ai-based-fake-papers-are-new-threat-academic-publishing](https://www.timeshighereducation.com/opinion/ai-based-fake-papers-are-new-threat-academic-publishing)                                                                                       | 专栏             | 提示 AI 拼接稿若混入正式投稿，可能带来期刊声誉受损与数据库收录风险，因此方案文本不得出现不可核文献链或伪造出处                            | 2026-03-29 | 已核验  |
+| [https://www.timeshighereducation.com/opinion/we-must-set-rules-ai-use-scientific-writing-and-peer-review](https://www.timeshighereducation.com/opinion/we-must-set-rules-ai-use-scientific-writing-and-peer-review)                                                                               | 专栏             | 提示隐藏提示词与 AI 审稿会制造失真、偏置和空泛反馈，因此方案表述必须避免模板化措辞以降低被视作 AI 生成稿的审稿警惕                        | 2026-03-29 | 已核验  |
+| [https://www.springernature.com/gp/researchers/the-researchers-source/safeguarding-research-blogpost/research-integrity-scholarly-books/27780154](https://www.springernature.com/gp/researchers/the-researchers-source/safeguarding-research-blogpost/research-integrity-scholarly-books/27780154) | 博客             | 提示编辑前筛查已开始检查无关参考文献与 AI 生成废话，因此证据条目必须保持页面级可核对、用途可解释，避免在初筛阶段被拦截                        | 2026-03-29 | 已核验  |
+| [https://blog.scholasticahq.com/post/journal-ai-policies/](https://blog.scholasticahq.com/post/journal-ai-policies/)                                                                                                                                                                               | 博客             | 提示期刊 AI 政策正转向强制披露作者与审稿人使用边界，因此若方案默认 AI 参与却不界定责任归属，易触发投稿政策不合规风险                       | 2026-03-29 | 已核验  |
+| [https://www.researchgate.net/post/The_Use_of_AI_in_Paper_Review](https://www.researchgate.net/post/The_Use_of_AI_in_Paper_Review)                                                                                                                                                                 | 论坛             | 提示作者社群已将 AI 生成的空泛拒稿意见视为现实问题，因此方案若缺少 study/run/contrast 级具体细节，易被审稿人按“公式化 AI 稿件”路径快速否决 | 2026-03-29 | 已核验  |
