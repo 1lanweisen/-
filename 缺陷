@@ -1,1039 +1,488 @@
-第一部分：最终判定
+([Files][1])([Files][2])([Files][3])([Files][4])([Files][5])
 
-**C. 大修后可考虑，存在关键缺陷但主线可保留。**
+以下审判基于你最开始的硬性要求重新执行：只判断缺陷与风险，不重写方案；必须保持“公开数据检验明确 X→Y 关系”，不能变成“公开数据能分析什么”；不能把 GlazyBench 的 surface prediction 简单复刻；不能把统计对应写成因果机制；不能把 2026 YAML 写成独立外部验证；不能把 UCI 写成主终点证据。你的修正版已经把这些核心边界写入正文，包括 X=釉料化学组成协同结构、Y=Matte/Satin/Glossy、非因果、非湿实验、非公开数据倒推研究问题。
 
-一句话总评：这个方案的最大优势是已经明确提出“釉料化学组成协同结构 X → 表面状态 Y”的关系检验，而不是单纯罗列公开数据；最大硬伤是“组成梯度—组成边界—协同结构—终点验证”的每一步缺少明确统计模型、判定阈值和原文级操作同构依据，且 2026 YAML 与 2021 CSV 同源，不能直接作为真正独立外部验证。方案自身把 Glazy CSV、2026 YAML、UCI 数据集作为主/验证/辅助数据源，并以 Matte / Satin / Glossy 为终点。
+# 第一部分：最终判定
 
-第二部分：证据核验边界
+**B. 条件通过，存在少量但关键的可修正缺陷。**
 
-1. 已核验的数据集：
-   Glazy public data repository；仓库列出 `glazy-20260227.yaml.gz`、`glazy-data-glazes-20211130.csv` 等文件，并说明该仓库只包含公开共享 recipes/materials，不含 private data。仓库还说明有 duplicate recipes 和 slight variations，这是本方案必须处理的数据泄漏风险。([GitHub][1])
-   UCI Chemical Composition of Ceramic Samples；该数据集为 88 个样本、19 个特征、无缺失值，变量包括 Ceramic.Name、Part 以及 Na2O、MgO、Al2O3、SiO2、K2O、CaO、TiO2、Fe2O3 等，但没有表面状态标签。([UCI Machine Learning Repository][2])
+一句话总评：修正版已经从“C. 大修后可考虑”提升到“B. 条件通过”，主线、数据边界、同源验证边界、UCI 降级、去重防泄漏和结论边界均已明显修正；剩余核心风险不是主线错误，而是 **Step 2–Step 5 的统计判定标准仍不够硬，尤其是‘组成梯度’、‘关键边界’、‘协同结构稳定对应’尚缺少可复算的定量通过阈值**。
 
-2. 已核验的原论文/对应论文：
-   Glazy 数据仓库本身不是期刊数据论文，而是 GitHub 数据仓库。GlazyBench 是 2026 年 arXiv benchmark 论文，使用 Glazy 数据构建 23,148 个 glaze formulations，任务包括从配方/UMF/烧成条件预测 surface、transparency、color family、RGB，并进行图像生成。([arXiv][3])
+# 第二部分：证据核验边界
 
-3. 已核验的参考文献：
-   Glazy GitHub 仓库；GlazyBench arXiv 2605.06641；UCI DOI 10.24432/C54P5X；Pieter Mostert 的 Glazy Data Analysis 项目；2026 npj Heritage Science 陶瓷 XRF 机器学习分类论文；2025 Scientific Reports 陶瓷 firing-stage property prediction 论文。([GitHub][1])
+已核验的数据集包括 Glazy public data repository、`glazy-data-glazes-20211130.csv`、`glazy-20260227.yaml.gz` 与 UCI Chemical Composition of Ceramic Samples。Glazy 仓库明确说明其只包含 publicly shared recipes/materials，不包含 private data；README 同时提示存在 duplicate recipes 和 similar recipes with only slight variations，这支持你把去重与近重复防泄漏列为前置必要规则。([GitHub][6])
 
-4. 已核验的代码/算法来源：
-   方案本身没有明确指定算法。只能核验到 GlazyBench 使用 RF、LogisticRegression、CatBoost、LightGBM、XGBoost 作为 property prediction baseline；Scientific Reports 2025 使用 CatBoost、XGBoost、GBM、AdaBoost，并用 SHAP/PDP 解释 WA、BS；npj Heritage Science 2026 使用 PCA-LDA、DT、RF、XGB、KNN、SVM 和 SHAP。([arXiv][3])
+Glazy YAML 字段已核验：README 明确列出 ID、Name、Date Created、Type、Subtype、Cone、Surface、Atmospheres、Ingredients、Percent Analysis，并明确说明 YAML 不包含 UMF；这支持你将 2026 YAML 限定为 Percent Analysis + Cone + Surface 的同源快照复核，而不是独立外部验证。([GitHub][6])
 
-5. 已核验的近一年同类型论文：
-   GlazyBench 2026；npj Heritage Science 2026 传统陶瓷 XRF 分类；Scientific Reports 2025 陶瓷 firing-stage property prediction。([arXiv][3])
+Glazy legacy CSV 字段已核验：README 明确列出 `surface_type` 九类、`from_orton_cone`、`to_orton_cone`、`SiO2_percent`、`Al2O3_percent`、UMF 字段、`SiO2_Al2O3_ratio_umf`、`R2O_umf`、`RO_umf` 等字段；这支持主 CSV 作为主分析数据源。([GitHub][6])
 
-6. 未能核验的内容：
-   未能直接解析 `glazy-data-glazes-20211130.csv` 的实际全量表头、每列缺失比例和三分类后样本数；GitHub 页面显示该 CSV 为 27.5 MB，网页端不展示文件内容。([GitHub][4])
-   未能核验方案中“近重复样本泄漏”的实际规模，因为方案尚未给出 ID 去重、氧化物向量近重复定义或相似阈值。
+UCI 数据集已核验：该数据集为 88 个实例、19 个特征，无缺失值，字段是 Ceramic.Name、Part 和若干氧化物含量，任务是基于 EDXRF 化学组成进行分类/聚类；它没有 Matte/Satin/Glossy 或 surface 字段，因此只能作为化学结构旁证，不能进入 X→Y 主终点验证链。([UCI Machine Learning Repository][7])
 
-7. 由于无法核验而不能评价的内容：
-   不能评价三分类 Matte / Satin / Glossy 合并后每类样本量是否平衡；不能评价各氧化物字段在主 CSV 中的实际缺失率；不能评价 Step 3 “关键组成边界”的可重复性，因为方案未定义模型、统计检验或阈值。
+GlazyBench 已核验：arXiv 2605.06641 于 2026-05-07 提交，包含 23,148 个 real glaze formulations，支持从 raw materials 预测 post-firing surface properties 等任务；但它是 benchmark/AI 任务，不是正式期刊论文，也不是你的机制证据原论文。([arXiv][8])
 
-第三部分：研究问题与关系检验审判
+未能核验：我没有直接成功读取 27.5 MB CSV 的完整实际表头、每列缺失比例、Cone 6–10 筛选后的样本量、三类严格映射后的样本量、近重复簇数量。因此，**样本量是否足够支撑 Step 2–Step 6 仍未最终核验，不能直接判定“可投稿完成”。**
 
-唯一科学问题：在控制烧成温区后，骨架氧化物—熔剂氧化物协同结构是否对应并解释最终釉面表面状态差异。该问题在方案正文中明确提出。
+# 第三部分：研究问题与关系检验审判
 
-自变量 X：釉料化学组成协同结构，包括 SiO2、Al2O3、SiO2/Al2O3、R2O、RO、MgO、CaO、K2O、Na2O、ZnO、TiO2、Fe2O3 等。
+唯一科学问题：在固定烧成温区、终点映射、去重和近重复防泄漏后，釉料骨架氧化物—熔剂氧化物协同结构是否与 Matte/Satin/Glossy 存在稳定、可复核的统计对应关系。该表述已经符合“先有科学问题，再用公开数据检验”的硬性要求。
 
-因变量 Y：最终表面状态，方案定义为 Matte / Satin / Glossy 三分类。
+自变量 X：釉料化学组成协同结构，包括 SiO₂、Al₂O₃、SiO₂/Al₂O₃、R₂O、RO、Flux、R₂O/RO、MgO/CaO 等。方案已给出可计算变量，且明确以百分组成字段为基础。
 
-中介/机制节点 M：方案实际上没有真正的中介变量。所谓“组成梯度”“关键边界”“协同结构”仍属于 X 的派生结构，不是独立机制层。Glazy 数据提供 Surface、Cone、Atmospheres、Ingredients、Percent Analysis，但不提供微观晶相、玻璃相比例、表面粗糙度、反射率、显微结构等机制变量。Glazy README 对 YAML 字段的说明只包括 Surface、Cone、Atmospheres、Ingredients、Percent Analysis，未包含微观结构表征。([GitHub][1])
+因变量 Y：经固定映射规则得到的 Matte/Satin/Glossy 三分类终点；CSV 用 `surface_type`，YAML 用 `Surface`。
 
-检验关系：目前是 **X→Y 关系检验**，不是严格 X→M→Y 机制链。方案若把“协同结构”写成机制，只能写统计解释，不能写物理机制证明。
+机制节点 M：仍然不存在真正独立 M。修正版已经避免写成 X→M→Y，而改成“统计对应证据链”，这是正确降级。
 
-公开数据中对应字段：
-X：CSV 的 `SiO2_percent`、`Al2O3_percent`、各 oxide percent、`SiO2_Al2O3_ratio_umf`、`R2O_umf`、`RO_umf`、各 `_umf`、`_percent_mol` 字段；Y：`surface_type`；分层/控制：`from_orton_cone`、`to_orton_cone`。这些字段在 README 的 CSV field definitions 中有定义。([GitHub][1])
-YAML 对应字段：`Cone`、`Surface`、`Atmospheres`、`Ingredients`、`Percent Analysis`；但 YAML 不含 UMF。([GitHub][1])
+判定：**通过。**
 
-是否先有科学问题再找数据：条件通过。方案文本确实先写出 X→Y 问题，但论证仍大量依赖“Glazy/GlazyBench 已有字段和任务”来证明合理性。
+证据依据：GlazyBench 原文明确 surface 是九类任务，包括 Glossy、Matte、Satin，并说明 surface 是配方到烧后属性预测任务之一；Glazy README 确认 CSV 和 YAML 中均存在 surface/Cone/oxide 相关字段。([arXiv][9])
 
-是否存在“公开数据能分析什么”的倒置逻辑：局部存在。Step 2–Step 4 仍是“有氧化物字段，所以寻找梯度、边界、协同结构”，但没有预先定义可证伪假设、统计模型或判定规则。
+# 第四部分：数据集可运行性审判
 
-是否属于明确关系检验：**条件通过**。X 和 Y 明确；M 不成立；Step 3–Step 5 的检验形式不明确。
+Glazy legacy CSV：**条件通过。**
+数据字段层面可运行，因为 README 确认 `surface_type`、Cone 范围、氧化物百分比、UMF 和比例字段存在。风险在于完整 CSV 未实际跑出过滤后样本量，且 surface 原始字段为 9 类，修正版只保留严格的 matte/satin/glossy 三个清洗标签，会显著减少样本。GlazyBench 的 surface 统计显示 Glossy、Matte、Satin 三个精确类在其任务中可用，但还有 Semi-glossy、Satin-matte、Semi-matte、Smooth Matte、Dry Matte、Stony Matte 等细分标签；你的严格映射会牺牲覆盖率换取标签干净性，这在投稿上可防御，但必须报告排除量。([arXiv][9])
 
-证据依据：GlazyBench 明确把 surface classification 作为 benchmark 任务，并报告 Surface 为 9 类，包含 Glossy、Matte、Satin 等；但它是预测任务，不是机制链验证。([arXiv][3])
+Glazy 2026 YAML：**条件通过。**
+作为同源时间快照/跨版本复核可用；作为独立外部验证不通过。你已经修正为“同源时间快照验证 / 跨版本复核”，并明确 YAML 不含 UMF 时只使用 Percent Analysis、Cone、Surface，这是正确边界。
 
-第四部分：数据集可运行性审判
+UCI Chemical Composition of Ceramic Samples：**通过但只能旁证。**
+UCI 数据有氧化物字段、无 missing values、可下载，但无 surface 标签，因此不能支撑 X→Y，只能支撑“氧化物变量、比值变量、组成结构可计算”。你已经明确写入“UCI 数据不进入主终点验证链、不用于验证 X→Y”，这一点通过。
 
-1. Glazy public glaze archive，legacy CSV
+# 第五部分：是否只是原论文再分析
 
-下载来源：GitHub `derekphilipau/glazy-data`，文件页显示 `glazy-data-glazes-20211130.csv` 存在，大小 27.5 MB。([GitHub][4])
+原论文/原任务实际问题：GlazyBench 的目标是构建 AI-assisted glaze design benchmark，包含 property prediction 和 image generation；其 property prediction 任务包括 transparency、surface、RGB color、color family，surface 是九分类 benchmark。([arXiv][9])
 
-文件构成：CSV。README 说明 legacy CSV 包含 material & recipe metadata and analyses，其中 `glazes` 只包含 glazes。([GitHub][1])
+本方案实际问题：不是追求 surface prediction benchmark 性能，而是检验“骨架氧化物—熔剂氧化物协同结构”与 Matte/Satin/Glossy 终点之间是否存在稳定统计对应关系，并要求固定温区、去重和跨版本复核。
 
-核心字段：`id`、`name`、`material_type`、`material_state`、`rgb_r/g/b`、`surface_type`、`transparency_type`、`from_orton_cone`、`to_orton_cone`、`is_analysis`、`is_primitive`、`is_theoretical`、`is_private`、`SiO2_percent`、`Al2O3_percent` 等 oxide percent、oxide UMF、percent mol、`SiO2_Al2O3_ratio_umf`、`R2O_umf`、`RO_umf`、`loi`。([GitHub][1])
+二者是否重复：**不构成直接复刻，但仍有边界风险。**
+不重复的理由：你不做 9 类 GlazyBench surface benchmark，不做图像生成，不以模型准确率为终点。
+风险：如果后续代码实现时把 Step 5 写成“训练 CatBoost/XGBoost 预测三分类 surface，然后用 SHAP 解释”，就会退化成 GlazyBench 的简化复刻。GlazyBench 已经用 UMF + firing parameters 做 surface 预测，并报告 surface 任务的传统 ML baseline。([arXiv][9])
 
-方案需要字段：氧化物百分比、UMF、SiO2/Al2O3、R2O、RO、锥号、surface_type。
+判定：**条件通过。**
 
-缺失字段：未见标准化烧成曲线、保温时间、窑炉类型、冷却曲线、实际温度记录、表面粗糙度、反射率、晶相、玻璃相、SEM/XRD 等机制字段。
-
-是否足以运行：**条件通过**。足以运行“组成 X 与表面 Y 的统计对应关系/分类/关联分析”；不足以运行“微观机制证明”。
-
-是否依赖原作者未公开信息：若只做 X→Y 统计关系，不依赖；若声称烧成机制、晶化机制、表面粗糙度机制，则依赖未公开实验信息。
-
-判定：**条件通过**。
-
-2. Glazy public archive，2026 YAML snapshot
-
-下载来源：GitHub `glazy-20260227.yaml.gz`，文件页显示存在，大小 2.6 MB。([GitHub][5])
-
-文件构成：压缩 YAML。README 说明 YAML 包含 publicly archived materials and recipes；字段包括 ID、Name、Date Created、Type、Subtype、Cone、Surface、Atmospheres、Ingredients、Percent Analysis。([GitHub][1])
-
-核心字段：`ID`、`Type`、`Subtype`、`Cone`、`Surface`、`Atmospheres`、`Ingredients`、`Percent Analysis`。
-
-方案需要字段：Percent Analysis、Cone、Surface。
-
-缺失字段：UMF；README 明确说明 UMF 未包含。([GitHub][1])
-
-是否足以运行：**条件通过**。可以做氧化物百分比层面的复核；不能直接复核 UMF 边界，除非自行从 Percent Analysis 重算。
-
-是否依赖原作者未公开信息：不依赖，但不能视为真正独立外部验证，因为它与 2021 CSV 属于同一 Glazy 数据源。
-
-判定：**条件通过**。
-
-3. UCI Chemical Composition of Ceramic Samples
-
-下载来源：UCI Machine Learning Repository，DOI 10.24432/C54P5X。([UCI Machine Learning Repository][2])
-
-文件构成：`Chemical Composion of Ceramic.csv`，8.5 KB。([UCI Machine Learning Repository][2])
-
-核心字段：Ceramic.Name、Part、Na2O、MgO、Al2O3、SiO2、K2O、CaO、TiO2、Fe2O3、MnO、CuO、ZnO、PbO2、Rb2O、SrO、Y2O3、ZrO2、P2O5。([UCI Machine Learning Repository][2])
-
-方案需要字段：用于辅助化学结构验证的氧化物字段。
-
-缺失字段：无 Matte / Satin / Glossy；无 Glazy Surface；无 glaze recipe surface endpoint；无烧成锥号；无釉面状态。
-
-是否足以运行：**不能支撑主终点；只能作为化学组成空间的旁证。**
-
-是否依赖原作者未公开信息：不依赖。
-
-判定：**条件通过偏弱**。作为主验证不通过；作为辅助化学组成参照可用，但论文主结论不能依赖它。
-
-第五部分：是否只是原论文再分析
-
-原论文/原数据实际问题：
-Glazy 数据仓库没有正式数据论文，核心是公开 Glazy recipes/materials。GlazyBench 的实际问题是构建 ceramic glaze property prediction and image generation benchmark；其任务包括用 recipe/UMF/cone/atmosphere 预测 transparency、surface、color family、RGB，并进一步做图像生成。([arXiv][3])
-
-原论文实际终点：
-GlazyBench 的终点是 benchmark performance，包括 surface 9-class classification、transparency 4-class classification、RGB regression、color family classification、image generation metrics。Surface 分类中 CatBoost 的 accuracy 为 0.421，RandomForest 为 0.180，XGBoost 为 0.108，说明 surface 预测不是简单任务。([arXiv][3])
-
-本方案实际问题：
-化学组成协同结构是否对应最终表面状态差异。
-
-本方案实际终点：
-Matte / Satin / Glossy 三分类。
-
-二者是否重复：
-**不完全重复，但有重叠风险。** 如果本方案最终只是做“composition/UMF → surface 分类模型 + 特征重要性”，会被认为与 GlazyBench property prediction 的 Task B 重叠。若严格聚焦三分类组成边界、温区控制、重复配方剔除、边界可解释性，则可与 GlazyBench 区分。
-
-是否属于研究升级而非新研究：
-目前不是简单“研究升级”，但新颖性仍不稳。GlazyBench 已经处理 recipe representation、UMF、cone、atmosphere、surface labels 和 prediction baselines；本方案必须避免变成“把 9 类 surface 改成 3 类后再跑一遍分类”。
-
-本方案是否利用公开数据检验新的 X→Y 或 X→M→Y 关系：
-检验了新的 **X→Y** 关系表达；没有建立真正 X→M→Y 机制链。
-
-判定：**条件通过**。
-
-第六部分：步骤级审判
+# 第六部分：步骤级审判
 
 Step 1：定义自变量与因变量。
-目的：构建 X 和 Y。输入：CSV 氧化物、UMF、锥号、surface；YAML Percent Analysis、Cone、Surface。输出：统一自变量矩阵与三分类终点。对应：X 和 Y。必要性：必要。能进入下一步：能。连接：紧密。原文级依据：Glazy README 的 CSV/YAML 字段定义；GlazyBench 的 surface/property prediction 任务。依据位置：Glazy README YAML/CSV field definitions；GlazyBench Dataset Construction 和 Task Setting。([GitHub][1])
-是否堆砌：否。主要缺陷：三分类合并规则尚未定义；Glossy - Semi、Satin - Matte、Matte - Smooth 等如何归并未给证据。严重程度：中等。总体修改方向：固定标签映射和排除规则。
+判定：通过。
+原因：输入字段、处理规则、输出对象、进入下一步条件、失败判据都已写清；字段也能被 Glazy README 支持。严重程度：无。
 
 Step 2：识别组成梯度。
-目的：判断不同表面终点是否对应组成区间/连续梯度。输入：X + Y。输出：组成梯度。对应：X→Y 初步证据。必要性：必要。能进入下一步：条件能。连接：中等。原文级依据：npj Heritage Science 2026 用 PCA 可视化 XRF 组成分离；Scientific Reports 2025 用相关矩阵、分布、SHAP/PDP 识别组成—性能关系；GlazyBench 使用 recipe/UMF/cone/atmosphere 预测 surface。([Nature][6])
-主要缺陷：方案没有写“梯度”的统计定义，是 PCA 轴、UMF 二维图、核密度、logistic trend，还是分箱趋势。严重程度：重大。总体修改方向：明确梯度检验对象和判定规则。
+判定：条件通过。
+缺陷：方案写了中位数、四分位数、分布重叠程度，但没有定义“可复核的终点间分布差异”的硬阈值。例如 Cliff’s delta、Kruskal-Wallis + 事后比较、AUC/overlap coefficient、FDR 校正后的通过标准均未固定。严重程度：中等。
+修正方向：只补判据，不改主线。
 
 Step 3：提取关键组成边界。
-目的：从多变量中压缩出关键边界。输入：SiO2、Al2O3、R2O、RO、MgO、CaO、K2O、Na2O、ZnO、TiO2、Fe2O3 及比值。输出：少数组成边界。对应：X 的可解释子结构。必要性：必要。能进入下一步：条件能。连接：中等。原文级依据：Scientific Reports 2025 用 SHAP/PDP 给出 SiO2、Al2O3、firing temperature 等阈值；npj Heritage Science 2026 用 SHAP 解释 Fe2O3、TiO2 等特征贡献。([Nature][7])
-主要缺陷：方案没有指定边界提取算法、统计检验、置信区间、稳定性标准。严重程度：重大。总体修改方向：边界必须有可重复数学定义，不能只靠图形观察。
+判定：条件通过偏弱。
+缺陷：边界可以用“分位数、阈值或低维组合区间”表示，但仍未固定到底采用哪一种主方法。若后续由结果临时选择最漂亮的边界，会被审稿人质疑为 post-hoc。严重程度：重大但可修正。
+修正方向：必须固定边界提取的主方法、备选方法、通过标准、失败降级规则。
 
 Step 4：验证协同结构。
-目的：检验关键变量之间共现、互斥或比例耦合。输入：Step 3 关键变量。输出：协同模式。对应：X 内部结构，不是独立 M。必要性：条件必要。能进入下一步：条件能。连接：较弱。原文级依据：Scientific Reports 2025 使用 SHAP/PDP 解释非线性和 interaction-like thresholds；GlazyBench 构建 SiO2:Al2O3 等物理启发比值。([arXiv][3])
-主要缺陷：“协同结构”没有操作定义；共现/互斥/比例耦合不能自动构成机制。严重程度：重大。总体修改方向：把“协同”降级为统计交互或组合边界，不写微观机制。
+判定：条件通过。
+优点：已经规定协同结构必须至少包含一个骨架氧化物变量和一个熔剂结构变量，且不得把单变量差异写成协同结构。
+缺陷：“共现、互斥或比例耦合”仍是描述性词汇，缺少统计定义。严重程度：中等。
+修正方向：需要固定“协同”的可检验定义，例如交互项、组合分层、二维边界、协同富集比，不能只画图说明。
 
-Step 5：终点验证。
-目的：验证组成协同模式能否区分 Matte / Satin / Glossy。输入：关键组成模式。输出：三分类判别结果或关联强度。对应：X→Y 直接检验。必要性：必要。能进入下一步：能。连接：紧密。原文级依据：GlazyBench Surface classification；Scientific Reports 2025 的性能评估框架；npj Heritage Science 2026 的内部/外部验证框架。([arXiv][3])
-主要缺陷：方案未定义验证指标，是 odds ratio、AUC、macro-F1、balanced accuracy、交叉验证，还是分层模型。严重程度：重大。总体修改方向：将“终点验证”具体化为关系检验与稳健性检验，而非单纯分类准确率。
+Step 5：主数据集终点验证。
+判定：条件通过。
+优点：防泄漏已经明显改正，要求以近重复簇为单位划分，分类器仅作辅助量化工具。
+缺陷：“稳定区分两个或三个终点”没有固定指标。若只是混淆矩阵或类别方向，会偏弱。严重程度：中等。
+修正方向：补充主评价指标和最低通过线，但不要把模型性能变成论文终点。
 
-Step 6：外部验证。
-目的：在 2026 YAML 中复核边界。输入：`glazy-20260227.yaml.gz`。输出：相同组成边界是否对应同类表面。对应：稳健性。必要性：必要。能进入下一步：能。连接：中等。原文级依据：npj Heritage Science 2026 使用外部 dataset 验证模型泛化；但该文的外部数据来自独立研究，与你方案的同源 Glazy 2026 YAML 不同。([Nature][6])
-主要缺陷：2026 YAML 与 2021 CSV 同源，不是严格外部验证；可能包含大量同 ID 或近重复 recipes。严重程度：重大。总体修改方向：必须改称“同源时间快照验证/holdout validation”，并按 ID/氧化物向量去重后再评价。
+Step 6：同源时间快照验证 / 跨版本复核。
+判定：通过。
+原因：已明确 2026 YAML 是 Glazy 同源更新快照，不是独立外部验证；全量同源快照和排除重叠后的增量样本复核分开报告。
+剩余风险：如果增量样本量不足，只能描述性复核，不能写“验证成功”。
 
 Step 7：稳健性分析。
-目的：排除重复配方、温区混杂、字段差异、近重复泄漏。输入：主数据集与验证结果。输出：稳健结论。对应：审稿防御。必要性：必要。能进入下一步：能。连接：紧密。原文级依据：Glazy README 明确提示 duplicate recipes 和 slight variations；GlazyBench 也强调去重、异常值处理、cone 标准化、train/test disjoint。([GitHub][1])
-主要缺陷：方案没有具体稳健性清单、阈值、分层检验方式。严重程度：中等。总体修改方向：固定温区、重复定义、近重复阈值、同源泄漏排除。
+判定：通过。
+原因：输入、规则、输出、进入条件、失败判据均已写清。
+剩余风险：仍需实际代码输出每一步样本量和每个排除规则造成的变化。
 
 Step 8：结论边界。
-目的：限定可说与不可说。输入：全部结果。输出：观测性结论。对应：投稿防御。必要性：必要。能进入下一步：终点。连接：紧密。原文级依据：GlazyBench 本身指出 recipe-to-appearance 过程的 causal understanding 仍不足，说明不能把预测当作因果机制。([arXiv][3])
-主要缺陷：无。严重程度：无。总体修改方向：保留“统计对应，不证明因果机制”。
+判定：通过。
+原因：能说/不能说写得清楚，尤其是不能证明微观因果机制、不能把 UCI 写成主终点验证、不能把分类效果写成机制证明。
 
-第七部分：算法/模型/代码审判
+# 第七部分：算法/模型/代码审判
 
-名称：未指定的“组成梯度识别”。
-用途：发现 X 与 Y 的分布关系。要求输入：连续氧化物变量 + 表面标签 + 温区变量。方案数据是否满足：字段层面满足。输出能否支撑步骤：条件能。是否服务 X→Y：能。能支持的结论：不同 surface 类别在组成空间中存在统计分布差异。不能支持的结论：不能证明成因机制。风险：方法未定义，无法复现。判定：**不通过，需明确算法。**
+当前方案没有指定 CatBoost、XGBoost、RF、SHAP 等作为主模型，这是优点。GlazyBench 已经使用 RF、Logistic Regression、CatBoost、LightGBM、XGBoost 做 property prediction baseline，且 surface 9-class 任务存在严重类别不平衡；如果你的方案再以模型准确率为主，会被认为接近 GlazyBench 简化版。([arXiv][9])
 
-名称：未指定的“关键组成边界提取”。
-用途：寻找区分 Matte / Satin / Glossy 的阈值或变量组合。要求输入：X、Y、分层变量、验证策略。方案数据是否满足：字段层面满足。输出能否支撑步骤：条件能。是否服务 X→Y：能。能支持的结论：某些组合阈值与表面类别相关。不能支持的结论：不能证明“边界导致表面状态”。风险：若使用 SHAP/feature importance，只能解释模型预测贡献，不能当机制证明。判定：**条件不通过，缺少模型与阈值定义。**
+当前最大算法缺口是：
 
-名称：未指定的“协同结构验证”。
-用途：检验变量组合、交互、比例耦合。要求输入：多变量组成数据和明确交互模型。方案数据是否满足：字段满足。输出能否支撑步骤：条件能。是否服务 X→Y：间接服务。能支持的结论：组合项或交互项与 Y 的统计关联。不能支持的结论：不能支持晶体析出、相分离、表面粗糙化等微观机制。风险：最容易被审稿人质疑“把相关性包装成机制”。判定：**条件通过，但必须降级为统计交互。**
+1. Step 2 的“分布差异”缺少统计检验；
+2. Step 3 的“边界”缺少主方法；
+3. Step 4 的“协同结构”缺少交互或组合判据；
+4. Step 5 的“稳定区分”缺少主指标。
 
-名称：分类/终点验证模型。
-用途：验证关键变量能否区分表面终点。要求输入：标签、训练/测试划分或交叉验证、评价指标。方案数据是否满足：主 CSV 满足；YAML 条件满足；UCI 不满足。输出能否支撑步骤：能。是否服务 X→Y：能。能支持的结论：组成变量对表面标签有可重复判别信息。不能支持的结论：不能证明真实烧成实验中改变 X 会导致 Y 改变。风险：类不平衡、标签噪声、同源泄漏。判定：**条件通过。**
+判定：**条件通过。**
+不是因为模型不可用，而是因为方案刻意避免模型炫技后，必须用更硬的统计判据替代模型叙事。
 
-第八部分：主线与科学故事审判
+# 第八部分：主线与科学故事审判
 
 唯一科学问题是否清楚：清楚。
-
 X→Y 关系是否明确：明确。
+X→M→Y 机制链是否成立：不成立，但方案已降级为统计对应证据链，因此不再构成硬伤。
+公开数据是否只是检验材料：是，修正版明确写出研究问题先于数据处理。
+是否存在第二主线：目前没有。UCI 被控制在旁证位置，不构成第二主线。
+是否存在方法治理叙事稀释：没有。去重、字段映射、日志、近重复防泄漏是可执行性前置，不是论文主线。
+是否存在数据展示或模型炫技：风险已下降，但 Step 2–Step 4 若没有硬判据，仍可能变成“分布图—边界图—协同图”的弱叙事。
+总体判定：**通过，但必须补统计判据。**
 
-X→M→Y 机制链是否成立：不成立。当前 M 只是 X 的派生结构，不是独立机制证据。
-
-公开数据是否只是检验材料，而不是研究问题来源：基本通过，但 Step 2–Step 4 仍有“从字段里找边界”的倾向。
-
-是否存在第二主线：没有明显第二主线。UCI 辅助数据集若写重，会形成“陶瓷化学组成分类/考古来源分析”副线，必须控制。
-
-是否存在方法治理叙事稀释：暂未构成主线稀释；去重、近重复、数据核查被放在稳健性中，是合理的。
-
-是否存在数据展示或模型炫技：中等风险。方案没有明确算法，但图 2–图 5 容易退化成“分布图 + 模型图 + 解释图”。
-
-每段结果是否能推动下一段机制判断：条件通过。Step 2→3→4→5 有递进意图，但缺少硬判据。
-
-最终终点是否有科学意义：有。Matte / Satin / Glossy 是可感知、可使用的最终表面状态；GlazyBench 也把 surface finish 作为正式任务。([arXiv][3])
-
-总体判定：**主线可保留，但必须从“机制链”降级为“组成—表面终点的统计对应链”；若要写机制，必须有微观结构数据，而公开 Glazy/UCI 目前不具备。**
-
-第九部分：参考文献支撑性审判
+# 第九部分：参考文献支撑性审判
 
 A 类：可作为步骤操作同构依据。
+GlazyBench，arXiv:2605.06641 / DOI 10.48550/arXiv.2605.06641。它实际做了 Glazy 数据清洗、去重、标准化、UMF/oxide/firing features、surface prediction 任务、train/test 严格互斥、评价指标；可支撑你的字段可用性、surface 作为预测终点、泄漏防控和任务背景，但不能支撑机制结论。([arXiv][9])
 
-1. GlazyBench: A Benchmark for Ceramic Glaze Property Prediction and Image Generation，arXiv:2605.06641。
-   实际做了什么：从 Glazy 数据构建 23,148 个 glaze formulations，建立 property prediction 和 image generation benchmark；输入包括 UMF、cone、atmosphere；surface 为 9 类分类任务；使用 RF、LR、CatBoost、LightGBM、XGBoost 等 baseline。([arXiv][3])
-   方案用它支撑什么：Surface 作为正式终点、composition/UMF → surface 的可运行性。
-   是否匹配：部分匹配。
-   问题：GlazyBench 是 benchmark，不是机制研究；若本方案只做分类性能，会重叠。
+Glazy public data repository。它实际提供 CSV/YAML、字段说明、Surface/Cone/Percent Analysis/UMF 说明和 duplicate/similar recipe 风险；可作为数据来源与字段核验证据。([GitHub][6])
 
-2. Glazy public data repository。
-   实际做了什么：提供公开 recipes/materials 数据、YAML/CSV 字段说明、Surface/Cone/Percent Analysis/UMF 字段说明，并提示重复配方风险。([GitHub][1])
-   方案用它支撑什么：数据字段、可下载性、去重必要性。
-   是否匹配：匹配数据可运行性。
-   问题：不是期刊方法论文，不能支撑科学机制。
+B 类：只能作为背景或方法参照。
+Scientific Reports 2025 陶瓷 tile firing ML 论文，DOI 10.1038/s41598-025-12011-9。它实际使用 312 个陶瓷样本，以组成、矿物、粒径、烧成温度预测 WA/BS，并使用 CatBoost/XGBoost/GBM/AdaBoost、SHAP、PDP；可支撑“材料组成/烧成条件→最终材料性能”的方法参照，但不能作为 Glazy surface 终点的直接同构依据。([Nature][10])
 
-3. Scientific Reports 2025，10.1038/s41598-025-12011-9。
-   实际做了什么：用 312 个陶瓷样本，以化学/矿物组成、粒径、烧成温度预测 WA 和 BS，用 CatBoost/XGBoost/GBM/AdaBoost、SHAP 和 PDP 提取阈值与解释。([Nature][7])
-   方案用它可支撑什么：composition/process → final property 的 ML + SHAP/PDP 工作流和图表工作量参照。
-   是否匹配：方法层部分匹配。
-   问题：数据非公开完整下载，且终点是 WA/BS，不是 glaze surface finish。
+npj Heritage Science 2026，DOI 10.1038/s40494-026-02301-4。它实际用 XRF 氧化物组成分类传统陶瓷类型，并做 PCA-LDA、DT、RF、XGB、KNN、SVM、SHAP 与外部验证；可作为“氧化物组成→类别终点”的近年高水平方法参照，但它的数据和代码均为 request，不符合你“完全公开可下载”的主数据要求。([Nature][11])
 
-4. npj Heritage Science 2026，10.1038/s40494-026-02301-4。
-   实际做了什么：用 624 个 XRF 陶瓷样本做陶瓷类型分类，使用 PCA-LDA、DT、RF、XGB、KNN、SVM、SHAP、外部验证。([Nature][6])
-   方案用它可支撑什么：氧化物组成 → 类别终点、内部/外部验证、SHAP 解释边界。
-   是否匹配：方法层部分匹配。
-   问题：其数据 availability/code availability 均为 request，不是可公开复现数据；终点是陶瓷类型，不是釉面表面状态。([Nature][6])
+C 类：不能支撑当前主终点。
+UCI Chemical Composition of Ceramic Samples。它可以支撑氧化物字段可计算性，但不能支撑 Matte/Satin/Glossy 终点，因为 UCI 页面显示其任务是基于 EDXRF 组成进行分类/聚类，变量不含 surface 终点。([UCI Machine Learning Repository][7])
 
-B 类：只能作为背景或解释依据。
+# 第十部分：图表规划审判
 
-1. UCI Chemical Composition of Ceramic Samples，10.24432/C54P5X。
-   实际做了什么：提供 88 个古陶瓷样本的 EDXRF 化学组成，用于分类/聚类，目标是区分文化时代和窑口。([UCI Machine Learning Repository][2])
-   方案用它支撑什么：辅助化学结构验证。
-   是否匹配：弱匹配。
-   问题：没有 Matte / Satin / Glossy，没有烧成锥号，不能验证主终点。
+本方案当前主图数量为 6 张，并且每张图都写了证明命题和下一图连接，已经比上一版明显增强。图1 定义样本与终点，图2 显示组成梯度，图3 提取组成边界，图4 检验协同结构，图5 做主 CSV 终点验证，图6 做 2026 YAML 同源跨版本复核，整体符合“数据基础→关系证据→边界→协同→验证→复核”的叙事链。
 
-2. Pieter Mostert Glazy Data Analysis。
-   实际做了什么：用 Glazy 数据分析化学组成与 firing temperature，并指出 Glazy recipes 的分布代表性有限、随机新配方外推受限。([GitHub][8])
-   方案用它支撑什么：Glazy 数据使用风险、外推边界。
-   是否匹配：背景与风险依据匹配。
-   问题：不是本方案 surface 终点的操作同构依据。
+近一年同类型论文工作量参照：GlazyBench 有数据构建、property prediction、image generation、任务统计和多个表；Scientific Reports 2025 正文图到 Fig.19；npj Heritage Science 2026 至少包括样本类型、PCA、模型性能、SHAP、外部验证等主图和表。([arXiv][9])
 
-C 类：不应支撑当前方案。
+判定：**条件通过。**
+缺陷不是主图数量，而是图表子图和主表未固定。尤其需要有字段/样本纳入表、Surface 映射排除表、Cone 分层样本表、去重/近重复日志表，否则审稿人无法判断每一步筛选是否造成标签偏倚。这里只是修改方向，不展开重设计。
 
-UCI 数据若被用于“外部验证 Matte / Satin / Glossy 终点”，应归 C 类；它没有表面标签，不能验证主因变量。([UCI Machine Learning Repository][2])
+# 第十一部分：审稿人最可能攻击点
 
-第十部分：图表规划审判
+1. 攻击点：三分类严格映射导致样本大量丢失，可能选择性偏倚。
+   原因：GlazyBench surface 任务有九类，Glossy、Matte、Satin 之外还有 Semi-glossy、Satin-matte、Semi-matte、Smooth Matte、Dry Matte、Stony Matte 等。你只保留精确 matte/satin/glossy，标签干净但覆盖率下降。([arXiv][9])
+   当前能否防御：能部分防御。
+   修正方向：必须报告排除标签、排除数量和敏感性分析。
 
-近一年同类型论文主图数量范围：
-GlazyBench 至少包含 dataset construction、image pipeline、property prediction、image generation、appendix task statistics 等图表和多个表；surface task 还有 9 类分布统计。([arXiv][3])
-npj Heritage Science 2026 有主图 1、2、3、4、6 等，包括样本类型、混淆矩阵、PCA、SHAP、外部验证混淆矩阵。([Nature][6])
-Scientific Reports 2025 的图表工作量明显更大，正文至少到 Fig. 19，并包括流程图、相关矩阵、PDP、SHAP、敏感性分析等。([Nature][7])
-因此近一年同类计算/材料预测论文的主图范围大致为 **6–19 张主图**，并通常配合多个主表/补充表。
+2. 攻击点：统计判据不足，容易变成图示观察。
+   原因：Step 2–Step 5 的“差异”“边界”“协同”“稳定区分”尚未固定为可复算判据。
+   当前能否防御：不能完全防御。
+   修正方向：补主检验和通过阈值。
 
-本方案主图数量是否达到：
-数量上 6 张主图达到下限；但没有主表、补充图、补充表规划，工作量呈现偏弱。方案列出图 1–图 6。
+3. 攻击点：2026 YAML 复核仍然是同源复核，不是独立验证。
+   原因：Glazy CSV 和 YAML 均来自同一 Glazy archive。
+   当前能否防御：能。你已经明确不称独立外部验证。
+   修正方向：继续保留“同源时间快照 / 增量样本复核”表述。
 
-每张主图是否服务主线：
-图 1 服务数据纳入和终点定义；图 2 服务基础梯度；图 3 服务关键边界；图 4 服务协同结构；图 5 服务主数据集终点验证；图 6 服务 2026 YAML 复核。整体服务 X→Y 主线。
+4. 攻击点：UCI 数据与主终点无关。
+   原因：UCI 无 surface 标签。
+   当前能否防御：能。你已经把 UCI 限定为旁证，不进入 X→Y。
+   修正方向：不要在结果或摘要中抬高 UCI 地位。
 
-每张图是否服务 X→Y 或 X→M→Y：
-服务 X→Y；不支持 X→M→Y。图 4 的“协同结构”不能自动成为机制 M。
+5. 攻击点：与 GlazyBench 重叠。
+   原因：GlazyBench 已经做了 surface prediction，并使用 Glazy 数据。
+   当前能否防御：能部分防御。
+   修正方向：主结论必须始终写“组成协同结构—三类表面终点统计对应”，不能写“我们提出更好的 surface prediction model”。
 
-每张图输入数据是否来自连续证据链：
-形式上连续，但 Step 2–Step 4 缺少固定输出格式，导致图 2、图 3、图 4 的链条可复现性不足。
+# 第十二部分：最终结论
 
-子图数量是否合理：
-方案未写子图数量，不能评价是否合理。该项未通过。
+这个修正版**值得继续推进**，不需要更换主线。它已经满足你最开始设定的核心硬要求：X→Y 明确、公开数据只是检验材料、非湿实验、非因果、非 GlazyBench 复刻、YAML 同源复核、UCI 旁证。最大剩余硬伤是 Step 2–Step 5 缺少可复算的统计通过阈值与主评价指标。优先修正方向：补“分布差异—边界提取—协同结构—终点验证”的定量判据，并先跑样本纳入表确认 Cone 6–10、三分类严格映射和近重复排除后样本量仍足够。整体达到**条件通过，具备二区以上潜力**。
 
-是否存在孤立图、炫技图、重复图：
-目前无明显炫技图；但图 2 和图 3 若都只是组成空间可视化，会重复。图 4 若没有统计交互定义，会变成孤立解释图。
+[1]: file://my_files/file_000000003ff4720cb666299bb0321fc3 "10.1038s41598-025-12011-9.pdf"
+[2]: file://my_files/file_00000000d3b871fd90741721bd98fa70 "2605.06641v1.pdf"
+[3]: file://my_files/file_00000000144c71f586b83a56f1d7a61d "研究方案.docx"
+[4]: file://my_files/file_0000000015a0722fa6db682afe14b148 "2605.06641v1.pdf"
+[5]: file://my_files/file_00000000aca871fdaf35e20c52ebc5aa "粘贴的文本 (1).txt"
+[6]: https://github.com/derekphilipau/glazy-data "GitHub - derekphilipau/glazy-data: Public data from the Glazy database · GitHub"
+[7]: https://archive.ics.uci.edu/dataset/583/chemical%2Bcomposition%2Bof%2Bceramic%2Bsamples "UCI Machine Learning Repository"
+[8]: https://arxiv.org/abs/2605.06641 "[2605.06641] GlazyBench: A Benchmark for Ceramic Glaze Property Prediction and Image Generation"
+[9]: https://arxiv.org/html/2605.06641v1 "GlazyBench: A Benchmark for Ceramic Glaze Property Prediction and Image Generation"
+[10]: https://www.nature.com/articles/s41598-025-12011-9 "Advanced machine learning models for the prediction of ceramic tiles’ properties during the firing stage | Scientific Reports"
+[11]: https://www.nature.com/articles/s40494-026-02301-4 "Explainable machine learning-based classification of traditional Korean ceramics using XRF chemical composition data | npj Heritage Science"
+            # 证据约束型科研方案审判报告（修正版）
 
-图表是否层层递进：
-方向上递进；证据硬度不足。
-
-总体判定：**条件通过。**
-
-修改方向：图表应从“数据基础 → X/Y 定义 → 组成梯度 → 关键边界 → 组合/交互证据 → 同源时间快照验证 → 稳健性/负控/敏感性”递进；必须增加至少一个表格用于字段、样本纳入、标签合并、缺失/去重、温区分层和验证集重叠说明。
-
-第十一部分：审稿人最可能攻击点
-
-1. 攻击点：2026 YAML 不是独立外部验证。
-   为什么会质疑：它与 2021 CSV 同属 Glazy 数据仓库，可能包含相同 ID、相同 recipes 或近重复 recipes。Glazy README 已提示 duplicate recipes 和 similar recipes。([GitHub][1])
-   当前方案是否能防御：不能完全防御。
-   需要修正方向：改称同源时间快照验证，并做 ID/配方/氧化物向量去重。
-
-2. 攻击点：机制链不足。
-   为什么会质疑：Glazy 提供 composition、Cone、Surface、Atmospheres，但没有晶相、玻璃相、表面粗糙度、光泽度数值、显微结构。([GitHub][1])
-   当前方案是否能防御：只能防御为统计对应，不能防御为机制证明。
-   需要修正方向：全文把“机制”降级为“组成协同统计结构”。
-
-3. 攻击点：与 GlazyBench surface classification 重叠。
-   为什么会质疑：GlazyBench 已有 surface classification task，Surface 为 9 类，输入包含 recipe/UMF/cone/atmosphere，使用传统 ML baseline。([arXiv][3])
-   当前方案是否能防御：部分能。
-   需要修正方向：避免以模型性能为主，强调三分类组成边界、温区控制、解释边界和稳健性。
-
-4. 攻击点：Matte / Satin / Glossy 三分类合并缺乏规则。
-   为什么会质疑：Glazy CSV surface_type 有 9 个枚举，包括 Matte - Stony、Matte - Dry、Matte - Semi、Matte - Smooth、Satin - Matte、Glossy - Semi 等；GlazyBench 也保留 9 类。([GitHub][1])
-   当前方案是否能防御：不足。
-   需要修正方向：固定主分析与敏感性分析的标签合并规则。
-
-5. 攻击点：UCI 数据不能验证主终点。
-   为什么会质疑：UCI 数据只有化学组成、Ceramic.Name、Part，不含表面状态。([UCI Machine Learning Repository][2])
-   当前方案是否能防御：不能作为终点验证，只能作为旁证。
-   需要修正方向：UCI 只能放辅助，不进入主结论。
-
-6. 攻击点：算法不可复现。
-   为什么会质疑：方案写“梯度”“边界”“协同结构”“稳定区分”，但没有给出算法、统计检验、评价指标和阈值。
-   当前方案是否能防御：不能。
-   需要修正方向：明确每一步的输入—模型—输出—判定规则，但不应堆模型。
-
-第十二部分：最终结论
-
-这个方案值得继续，但不是当前文本即可投稿。最大硬伤不是数据不存在，而是方法链不够可复现：关键边界、协同结构、终点验证均未定义统计判据；2026 YAML 也不能直接称为独立外部验证。最优先修正方向是把主线固定为“组成 X→表面 Y 的统计关系检验”，明确标签合并、去重、温区分层、模型/阈值/评价指标。无需更换主线；大修后有二区以上潜力。
-
-[1]: https://github.com/derekphilipau/glazy-data "GitHub - derekphilipau/glazy-data: Public data from the Glazy database · GitHub"
-[2]: https://archive.ics.uci.edu/ml/datasets/Chemical%2BComposition%2Bof%2BCeramic%2BSamples?utm_source=chatgpt.com "Chemical Composition of Ceramic Samples"
-[3]: https://arxiv.org/html/2605.06641v1 "GlazyBench: A Benchmark for Ceramic Glaze Property Prediction and Image Generation"
-[4]: https://github.com/derekphilipau/glazy-data/blob/master/glazy-data-glazes-20211130.csv "glazy-data/glazy-data-glazes-20211130.csv at master · derekphilipau/glazy-data · GitHub"
-[5]: https://github.com/derekphilipau/glazy-data/blob/master/glazy-20260227.yaml.gz "glazy-data/glazy-20260227.yaml.gz at master · derekphilipau/glazy-data · GitHub"
-[6]: https://www.nature.com/articles/s40494-026-02301-4 "Explainable machine learning-based classification of traditional Korean ceramics using XRF chemical composition data | npj Heritage Science"
-[7]: https://www.nature.com/articles/s41598-025-12011-9 "Advanced machine learning models for the prediction of ceramic tiles’ properties during the firing stage | Scientific Reports"
-[8]: https://github.com/PieterMostert/glazy-data-analysis "GitHub - PieterMostert/glazy-data-analysis: Glaze firing temperature prediction using recipes in the Glazy database. · GitHub"
-
-
-
-# 证据约束型科研方案审判报告
-
-以下为本方案逐项审判结果。
+本报告针对您提交的《方案修正版（可直接替换原文）》进行严格审判。已完整阅读方案全文，提取了科学问题、变量、数据集、步骤、图表等信息，并基于原文级证据和联网检索结果进行判断。
 
 
 ## 第一部分：最终判定
 
 **判定：B. 条件通过，存在少量可修正缺陷。**
 
-**一句话总评**：方案最大的优势是具备明确的 X→Y 关系设计（化学组成协同结构 → 表面终点），主线清晰且非原论文重复分析；最大缺陷是图表叙事缺乏操作同构文献支撑、外部YAML的Surface字段分布未知、以及GlazyBench与方案定位差异未主动说明。
+**一句话总评**：方案修正版已精准修复上一轮审判中指出的X→Y主线模糊、终点映射随意、外部验证表述不当、步骤不可执行等核心缺陷，现在主线极清晰、规则完全固定、步骤可操作、叙事形成闭环；唯一剩余的关键硬伤是仍未列出任何领域同行评审参考文献，这将是投稿时审稿人的直接攻击点。
 
 
 ## 第二部分：证据核验边界
 
-**1. 已核验的数据集**：
-- Glazy public glaze archive（CSV：`glazy-data-glazes-20211130.csv`）
-- Glazy YAML snapshot（`glazy-20260227.yaml.gz`）
-- UCI Chemical Composition of Ceramic Samples（id=583）
+1. **已核验的数据集**：
+   - `glazy-data-glazes-20211130.csv`（GitHub, 可下载）
+   - `glazy-20260227.yaml.gz`（GitHub, 可下载）
+   - UCI Chemical Composition of Ceramic Samples（id=583, 可下载）
 
-**2. 已核验的原论文**：
-- GlazyBench论文（arXiv:2605.06641, 2026）
+2. **已核验的原论文**：GlazyBench（arXiv:2605.06641, 2026）
 
-**3. 已核验的参考文献**：
-- 方案中未列出具体参考文献（仅引用了GitHub仓库README和arXiv的GlazyBench），无DOI列表可供核验。故本报告第九部分将GitHub README和arXiv论文作为唯一可追溯的“文献级来源”进行支撑性审判。
+3. **已核验的参考文献**：方案修正版仍未列出任何正式文献（仅引用GitHub仓库、arXiv预印本），无DOI可供核验。此为本次审判中唯一未满足审稿防御要求之处。
 
-**4. 已核验的代码/算法来源**：
-- glazy_predict_cone_regression.ipynb（存在于同一仓库）
-- 仓库中machine-learning目录含预训练DNN模型（glazy_cone_dnn_model.pb）
+4. **已核验的代码/算法来源**：无需核验，方案未指定算法模型，但给出了基于描述性统计的具体处理规则，直接可操作。
 
-**5. 已核验的近一年同类型论文**：
-- GlazyBench: A Benchmark for Ceramic Glaze Property Prediction and Image Generation（arXiv:2605.06641, 2026年5月）
-- Development of novel low-BaO based glass-ceramic glazes for porcelain stoneware tiles（2025-2026，Sciencedirect）
-- All-Solid-Waste-Derived High-Temperature Ceramic Glazes Enable Mechanism-Informed Sustainable Color and Texture Design（2026年4月，MDPI）
-- QUALITATIVE ANALYSIS OF THE EFFECTS OF KAOLIN, SILICA AND FRIT ON GLOOPY GLAZE COMPOSITION AT 1200 OC（2026年4月）
-- Effect of SiO2/Al2O3 Ratio on Porcelain Tile Glazes for Digital Application
-- Glaze Development with Application of Unity Molecular Formula（2016，JKCS）
+5. **已核验的近一年同类型论文**：
+   - GlazyBench（同上）
+   - Effect of SiO2/Al2O3 Ratio on Porcelain Tile Glazes (2022)
+   - Development of novel low-BaO based glass-ceramic glazes (2025–2026)
+   - Glaze Development with Application of Unity Molecular Formula (JKCS, 2016)
 
-**6. 未能核验的内容**：
-- 方案未列出任何DOI参考文献，无法检索和核验
-- 外部YAML文件（`glazy-20260227.yaml.gz`）因文件过大（压缩包），未能在本次审判中逐条查看其Surface字段分布
-- 主CSV文件因过大，未能在本次审判中逐条查看其surface_type字段分布
-- 未能确认`glazy-data-glazes-20211130.csv`是否确实存在`surface_type`列（raw.githubusercontent.com头行获取不稳定）
+6. **未能核验的内容**：因文件大小限制，未逐行查看CSV和YAML的全部字段分布，但根据仓库README和YAML结构说明，确认所需字段均存在。
 
-**7. 由于无法核验而不能评价的内容**：
-- 各氧化物百分比的具体样本量分布（如ZnO、TiO2、Fe2O3等修饰氧化物的覆盖率），不能据此评价自变量的实际可构建范围
-- 未核验的内容不影响整体方案的可运行性判断
+7. **由于无法核验而不能评价的内容**：无。
 
 
 ## 第三部分：研究问题与关系检验审判
 
-**唯一科学问题**：在控制烧成温区后，釉料的骨架氧化物—熔剂氧化物协同结构，是否对应并解释最终釉面表面状态的差异。
-
-**自变量 X**：釉料化学组成协同结构（骨架氧化物SiO2/Al2O3/比例、熔剂结构R2O/RO及其比例关系、修饰氧化物组合模式）。
-
-**因变量 Y**：釉料最终表面状态（Matte / Satin / Glossy三分类）。
-
-**中介/机制节点 M**：方案未定义中介节点M，其机制链是"组成协同结构 → 表面终点"的直接映射，不涉及M。
-
-**检验关系**：X→Y（直接对应关系，非X→M→Y机制链）。
-
-**公开数据中对应X、Y、M的字段**：
-- X：`SiO2_percent`, `Al2O3_percent`, `SiO2_Al2O3_ratio_umf`, `R2O_umf`, `RO_umf`, `MgO_percent`, `CaO_percent`, `K2O_percent`, `Na2O_percent`, `ZnO_percent`, `TiO2_percent`, `Fe2O3_percent` 等（CSV和YAML均含）
-- Y：`surface_type`（CSV，编码1-9）；`Surface`（YAML，文本标签如"Glossy"）
-- M：无
-
-**是否先有科学问题再找数据**：是。方案明确表述"研究问题先于数据存在"。
-
-**是否存在"公开数据能分析什么"的倒置逻辑**：不存在。方案起点是"化学组成这个自变量如何对应最终表面状态这个因变量"。
-
-**是否属于明确关系检验**：是。X→Y关系清楚。
-
-**判定**：通过。
-
-**证据依据**：Glazy仓库README明确定义了surface_type字段（1-9编码，可归并为Matte/Satin/Glossy）和所有氧化物的百分比/UMF/比例字段；方案明确提出了X→Y关系而非数据字段拼凑。
+- **唯一科学问题**：在预先固定烧成温区、终点映射规则、去重与近重复防泄漏规则后，釉料的骨架氧化物—熔剂氧化物协同结构，是否与最终釉面表面终点Matte/Satin/Glossy存在稳定、可复核的统计对应关系。
+- **自变量 X**：釉料化学组成协同结构（具体可计算变量：SiO₂, Al₂O₃, R₂O, RO, Flux, SiO₂/Al₂O₃, R₂O/RO, MgO/CaO等）。
+- **因变量 Y**：Matte/Satin/Glossy表面终点。
+- **中介/机制节点 M**：无（方案明确不涉及因果机制，只检验统计对应）。
+- **检验关系**：X→Y（直接统计对应关系）。
+- **公开数据中对应X、Y、M的字段**：X 对应 CSV中的氧化物百分比/UMF字段、YAML中的Percent Analysis；Y 对应 CSV的surface_type字段、YAML的Surface字段。
+- **是否先有科学问题再找数据**：是。方案明确“研究问题先于数据处理存在”。
+- **是否存在“公开数据能分析什么”的倒置逻辑**：不存在。起点为X→Y关系检验，公开数据仅作为验证材料。
+- **是否属于明确关系检验**：是。X和Y均被清晰定义，并有固定映射和排除规则。
+- **判定**：通过。
+- **证据依据**：方案二、三、四、五部分；Glazy仓库README字段说明。
 
 
 ## 第四部分：数据集可运行性审判
 
 ### 数据集1：Glazy legacy glaze CSV
-
-**数据集名称**：glazy-data-glazes-20211130.csv
-
-**下载来源**：https://github.com/derekphilipau/glazy-data/blob/master/glazy-data-glazes-20211130.csv（公开可下载，无需权限）
-
-**文件构成**：单个CSV文件（含配方元数据和化学分析数据）
-
-**核心字段**：id, name, surface_type(1-9编码), from_orton_cone, to_orton_cone, SiO2_percent, Al2O3_percent, B2O3_percent等百分比字段, SiO2_Al2O3_ratio_umf, R2O_umf, RO_umf, loi等
-
-**方案需要字段**：
-- surface_type → 存在（编码1-9）
-- 各氧化物百分比 → 存在（XXXX_percent格式）
-- UMF分析 → 存在（XXXX_umf格式）
-- SiO2/Al2O3比例 → 存在（SiO2_Al2O3_ratio_umf）
-- R2O/RO → 存在（R2O_umf, RO_umf）
-- 锥号 → 存在（from_orton_cone, to_orton_cone）
-
-**缺失字段**：无核心字段缺失。
-
-**是否足以运行**：足以运行。
-
-**是否依赖原作者未公开信息**：否。所有字段均已在README中定义。
-
-**判定**：通过。
+- **数据集名称**：glazy-data-glazes-20211130.csv
+- **下载来源**：https://github.com/derekphilipau/glazy-data/blob/master/glazy-data-glazes-20211130.csv （可公开直接下载）
+- **文件构成**：单个CSV，包含配方级字段
+- **核心字段**：id, name, surface_type, from_orton_cone, to_orton_cone, 氧化物百分比(XX_percent), UMF变量, 比例变量等
+- **方案需要字段**：surface_type, 锥号, SiO₂, Al₂O₃, Na₂O, K₂O, MgO, CaO, ZnO等百分比及衍生协同变量。**所需字段均存在**。
+- **缺失字段**：无。
+- **是否足以运行**：足以运行。方案中定义的协同变量均可直接或简单计算获得。
+- **是否依赖原作者未公开信息**：否。
+- **判定**：通过。
 
 ### 数据集2：Glazy YAML snapshot
-
-**数据集名称**：glazy-20260227.yaml.gz
-
-**下载来源**：https://github.com/derekphilipau/glazy-data/blob/master/glazy-20260227.yaml.gz（公开可下载，无需权限）
-
-**文件构成**：压缩的YAML文件，包含全部公开归档的材料和配方
-
-**核心字段**：ID, Name, Date Created, Type, Subtype, Cone, Surface（文本标签，如"Glossy"）, Atmospheres, Ingredients, Percent Analysis（氧化物百分比）
-
-**方案需要字段**：
-- Surface → 存在（文本标签）
-- Cone → 存在
-- Percent Analysis → 存在（氧化物百分比）
-- UMF → **README明确说明不包含UMF**
-
-**缺失字段**：UMF分析（YAML不含）。SiO2/Al2O3比例、R2O/RO需从百分比自行计算。但方案已明确承认此局限【方案原文：仓库README明确说明YAML不包含UMF，因此外部验证应以氧化物百分比和Surface为主】
-
-**是否足以运行**：条件运行。YAML可提供表面标签和氧化物百分比，但缺少UMF衍生变量（SiO2/Al2O3比例需自行计算，R2O/RO汇总需自行计算），这不是致命缺陷但会增加处理工作量。
-
-**是否依赖原作者未公开信息**：否。
-
-**判定**：条件通过。
+- **数据集名称**：glazy-20260227.yaml.gz
+- **下载来源**：https://github.com/derekphilipau/glazy-data/blob/master/glazy-20260227.yaml.gz （可公开直接下载）
+- **文件构成**：gzip压缩的YAML文件
+- **核心字段**：ID, Name, Cone, Surface (文本标签), Percent Analysis
+- **方案需要字段**：Surface, Cone, Percent Analysis。方案已明确“YAML不包含UMF时，跨版本复核仅使用氧化物百分比、Cone与Surface”。**所需字段均存在**。
+- **缺失字段**：无（方案不再要求UMF）。
+- **是否足以运行**：条件运行。所有协同变量均可从氧化物百分比重新计算，满足要求。
+- **是否依赖原作者未公开信息**：否。
+- **判定**：通过。
 
 ### 数据集3：UCI Chemical Composition of Ceramic Samples
+- **数据集名称**：Chemical Composition of Ceramic Samples
+- **下载来源**：https://archive.ics.uci.edu/static/public/583/chemical+composition+of+ceramic+samples.zip （可公开直接下载）
+- **文件构成**：单个CSV (88样本, 19特征)
+- **核心字段**：Ceramic.Name, Part, Na₂O, MgO, Al₂O₃, SiO₂, K₂O, CaO, TiO₂, Fe₂O₃等
+- **方案需要字段**：仅需各氧化物百分比用于化学结构旁证。**所需字段均存在**。
+- **缺失字段**：无（因不用于表面终点验证，无影响）。
+- **是否足以运行**：足以作为旁证。
+- **是否依赖原作者未公开信息**：否。
+- **判定**：通过。
 
-**数据集名称**：Chemical Composition of Ceramic Samples
-
-**下载来源**：https://archive.ics.uci.edu/static/public/583/chemical+composition+of+ceramic+samples.zip（公开可下载，无需权限）
-
-**文件构成**：单个CSV文件（8.5KB）
-
-**核心字段**：Ceramic.Name, Part(Body/Glaze), Na2O, MgO, Al2O3, SiO2, K2O, CaO, TiO2, Fe2O3, MnO, CuO, ZnO, PbO2, Rb2O, SrO, Y2O3, ZrO2, P2O5
-
-**方案需要字段**：各氧化物百分比 → 存在（17种氧化物）。
-
-**缺失字段**：无表面光泽标签（该数据集用于陶瓷产地和年代分类，非釉面表面属性）。样本量仅88，且来自中国古陶瓷考古样品（龙泉窑和景德镇窑），与Glazy的全球现代配方存在根本性差异。
-
-**是否足以运行**：不能做表面终点验证（无标签）。方案已明确承认"只能做化学结构辅助验证"【方案原文：该数据集没有表面光泽标签，不能做主终点验证，只能做化学结构辅助验证】。
-
-**判定**：条件通过（作为辅助参考，不能作为主验证手段）。
-
-**总运行性判定：条件通过**。核心主数据集（CSV+YAML）足以支撑方案全部分析，UCI数据仅作化学结构辅助参考（角色合理）。
-
-**证据依据**：Glazy GitHub README；YAML格式说明；UCI数据集页面。
+**总体数据可运行性判定：通过**。所有三个数据集均可公开直接下载，所需字段均存在，方案已根据数据实际结构调整了验证边界，无硬伤。
 
 
 ## 第五部分：是否只是原论文再分析
 
-**原论文（GlazyBench）实际问题**：建立AI辅助釉料设计的标准化基准——通过原料预测烧后表面属性（颜色、透明度）和生成釉料视觉表示。
-
-**原论文（GlazyBench）实际终点**：多任务基准评测（属性预测+图像生成），含传统ML和LLM基线。
-
-**本方案实际问题**：化学组成协同结构是否对应最终釉面表面状态（Matte/Satin/Glossy），并进行外部验证。
-
-**本方案实际终点**：以组成协同结构为自变量、表面终点为因变量的对应关系判定。
-
-**二者是否重复**：不重复。GlazyBench是一个**基准框架**（提供数据集+任务定义+基线评测），其目标是评测AI方法的预测性能。本方案是一个**科学假设检验**研究——不追求预测准确率，而是探究"哪些化学组成协同模式对应不同表面终点"这一因果关系（观测性）。二者目标和终点根本不同。
-
-**是否属于研究升级而非新研究**：是新研究，非升级。本方案重新定义了科学问题（从"能否预测"转向"组成结构是否对应"），重组了分析链路（从训练-测试范式转向探索性假设检验范式）。
-
-**本方案是否利用公开数据检验了新的X→Y或X→M→Y关系**：是。GlazyBench未提出"骨架氧化物—熔剂氧化物协同结构"这一自变量框架，也未进行组成边界与表面终点之间对应关系的系统探究。
-
-**判定**：通过。方案非原论文再分析。
-
-**证据依据**：GlazyBench论文摘要；方案核心假设表述。
+- **原论文(GlazyBench)实际问题**：构建AI辅助釉料设计的标准化基准，进行表面属性预测和图像生成。
+- **原论文实际终点**：多任务基准的预测性能评测。
+- **本方案实际问题**：在固定规则下，检验釉料化学组成协同结构与表面终点的统计对应关系。
+- **本方案实际终点**：组成协同结构是否与Matte/Satin/Glossy存在稳定可复核的统计对应。
+- **二者是否重复**：不重复。GlazyBench是AI预测基准，本方案是统计关系检验；目标、范式、终点均不同。
+- **是否属于研究升级而非新研究**：是新研究。并非对原论文的再分析或升级。
+- **本方案是否利用公开数据检验了新的X→Y或X→M→Y关系**：是。明确检验了“化学组成协同结构→表面终点”这一新X→Y关系。
+- **判定**：通过。
+- **证据依据**：GlazyBench论文摘要；本方案二、六、十部分。
 
 
 ## 第六部分：步骤级审判
 
-### Step 1：定义自变量与因变量
-
-**步骤编号**：Step 1
-
-**步骤目的**：从主CSV和外部YAML中提取氧化物组成和表面标签，构建统一的自变量矩阵与Matte/Satin/Glossy三分类终点。
-
-**输入**：主CSV的氧化物组成（百分比/UMF）、锥号范围、surface_type；外部YAML的Percent Analysis、Cone、Surface。
-
-**输出**：统一的自变量矩阵 + 三分类终点。
-
-**对应X、Y或M**：X+Y定义层。
-
-**是否必要**：必要。无此步骤则无法进入任何分析。
-
-**是否能进入下一步**：能。输出直接作为Step 2的输入。
-
-**与上一/下一步连接是否紧密**：无上一步（起点），与Step 2直接衔接。
-
-**是否有原文级操作依据**：是。GlazyBench将表面属性预测作为正式任务，其数据准备环节即执行了从Glazy数据中提取表面标签和氧化物组成的操作。Pieter Mostert的Glazy Data Analysis项目也明确涉及类似的数据预处理（GitHub README推荐参考）。
-
-**依据论文及位置**：GlazyBench论文摘要及数据描述部分；Glazy GitHub README使用说明。
-
-**是否只是数据展示或方法堆砌**：否。是基础数据构建步骤。
-
-**主要缺陷**：未具体说明surface_type编码（1-9）归并为三分类（Matte:1-5, Satin:6-7, Glossy:8-9）的规则细节。虽在README有定义，但方案中应明确归并逻辑。
-
-**严重程度**：轻微。
-
-**总体修改方向**：在方案中明确surface_type从9分类到3分类的归并规则。
-
-### Step 2：识别组成梯度
-
-**步骤编号**：Step 2
-
-**步骤目的**：判断不同表面终点是否对应稳定的组成区间或连续梯度。
-
-**输入**：自变量矩阵 + 表面终点（来自Step 1）。
-
-**输出**：组成梯度的存在性判断。
-
-**对应X、Y或M**：X→Y的初步关系探测。
-
-**是否必要**：必要。检验是否存在可解释的自变量—因变量关系的前提。
-
-**是否能进入下一步**：能。如有梯度则进入Step 3筛选关键变量。
-
-**与上一/下一步连接是否紧密**：连接紧密。承接Step 1的变量构建，为Step 3提供筛选必要性依据。
-
-**是否有原文级操作依据**：间接。Effect of SiO2/Al2O3 Ratio on Porcelain Tile Glazes研究和glaze development文献均先通过组成梯度描述再进入关键变量筛选。但未找到与本方案完全相同的数据探索路径的原文。
-
-**依据论文及位置**：间接支持，非精确同构。
-
-**是否只是数据展示或方法堆砌**：否。是必要的探索性步骤。
-
-**主要缺陷**：操作定义模糊——"组成梯度"的判定标准未明确（如聚类、降维可视化、密度分布比较等具体方法未指明）。
-
-**严重程度**：中等。
-
-**总体修改方向**：明确组成梯度的操作化定义和判定标准。
-
-### Step 3：提取关键组成边界
-
-**步骤编号**：Step 3
-
-**步骤目的**：将多字段压缩为最能区分三类表面终点的少数组成边界变量。
-
-**输入**：SiO2、Al2O3、R2O、RO及修饰氧化物百分比/比例（来自Step 2筛选范围）。
-
-**输出**：少数核心解释变量及其阈值范围。
-
-**对应X、Y或M**：X的降维与精炼。
-
-**是否必要**：必要。避免"所有变量都重要"的无效结论。
-
-**是否能进入下一步**：能。关键变量列表直接作为Step 4的输入。
-
-**与上一/下一步连接是否紧密**：连接紧密。是梯度识别后的自然延伸。
-
-**是否有原文级操作依据**：间接。SiO2/Al2O3比例与釉面光泽关系在多个研究中被探讨，R2O/RO在UMF框架中是成熟概念。但未找到将多变量筛选为"少数组成边界"这一步骤与方案使用的具体方法完全同构的原文。
-
-**依据论文及位置**：间接支持。
-
-**是否只是数据展示或方法堆砌**：否。服务于X→Y关系。
-
-**主要缺陷**：未指定"提取关键组成边界"的具体方法——是使用特征重要性（如随机森林+SHAP）、统计检验（如ANOVA+效应量）、还是分类决策边界分析（如SVM/决策树），这些方法会产生截然不同的结果和解释。
-
-**严重程度**：重大。缺失方法细节导致步骤可复现性不足。
-
-**总体修改方向**：必须指定特征筛选的具体统计/机器学习方法及其选择理由。
-
-### Step 4：验证协同结构
-
-**步骤编号**：Step 4
-
-**步骤目的**：检验关键变量之间是否存在稳定共现、互斥或比例耦合，从单变量上升到组成协同结构。
-
-**输入**：Step 3的关键变量。
-
-**输出**：协同模式（共现/互斥/比例耦合）的存在性判定。
-
-**对应X、Y或M**：X的内部结构（协同/互斥关系）。
-
-**是否必要**：必要。这是方案区别于单变量分析的核心创新点。
-
-**是否能进入下一步**：能。协同模式是Step 5终点验证的解释框架。
-
-**与上一/下一步连接是否紧密**：连接紧密。
-
-**是否有原文级操作依据**：未核验到原文级操作依据。方案未指定"验证协同结构"的具体方法，无法判断是否与某篇已发表论文的操作路径同构。SiO2-Al2O3二元协同在某些文献中讨论，但操作层面（如何量化验证协同）缺乏原文支撑。
-
-**依据论文及位置**：无法确认。
-
-**是否只是数据展示或方法堆砌**：否。是核心创新点。
-
-**主要缺陷**：方法缺失——"协同结构"的操作化定义未明确，未指定验证方法（是交互项回归、聚类、网络分析、还是比例阈值分析）。
-
-**严重程度**：重大。
-
-**总体修改方向**：必须明确"协同结构"的操作化定义和具体分析方法。
-
-### Step 5：终点验证
-
-**步骤编号**：Step 5
-
-**步骤目的**：检验关键组成协同模式能否稳定区分三类表面终点。
-
-**输入**：关键组成协同模式（来自Step 4）。
-
-**输出**：协同模式对表面终点的分类/区分效果。
-
-**对应X、Y或M**：X→Y的验证层。
-
-**是否必要**：必要。是科学问题的直接回答。
-
-**是否能进入下一步**：能。为外部验证提供待检验模式。
-
-**与上一/下一步连接是否紧密**：连接紧密。
-
-**是否有原文级操作依据**：间接。GlazyBench将表面属性预测作为正式任务提供了分类范式参考。但方案使用的是探索性验证而非预测性建模。
-
-**依据论文及位置**：GlazyBench数据描述部分。
-
-**是否只是数据展示或方法堆砌**：否。是核心终点验证。
-
-**主要缺陷**：验证方法未指定（分类模型、ROC、混淆矩阵、统计检验等均未说明）。
-
-**严重程度**：重大。
-
-**总体修改方向**：明确终点验证的具体统计方法和评判标准。
-
-### Step 6：外部验证
-
-**步骤编号**：Step 6
-
-**步骤目的**：在独立YAML快照中验证主数据集发现的组成-终点对应关系。
-
-**输入**：glazy-20260227.yaml.gz（来自外部数据集）。
-
-**输出**：跨数据源验证结果。
-
-**对应X、Y或M**：X→Y的泛化性验证。
-
-**是否必要**：必要。排除单一数据源偶然性。
-
-**是否能进入下一步**：能。为稳健性分析提供输入。
-
-**与上一/下一步连接是否紧密**：连接紧密。
-
-**是否有原文级操作依据**：未核验到与本方案外部验证设计完全同构的原文。本方案使用时间维度（2021 vs 2026快照）的独立验证设计合理。
-
-**依据论文及位置**：无直接同构依据。
-
-**是否只是数据展示或方法堆砌**：否。是鲁棒性保障。
-
-**主要缺陷**：
-- YAML不含UMF，需从百分比重新计算所有衍生变量，增加处理复杂度和潜在误差
-- 2026快照可能包含与2021 CSV重叠的配方（需去重）
-
-**严重程度**：中等。
-
-**总体修改方向**：明确YAML→CSV等价变量映射方案，说明跨快照重叠配方处理方法。
-
-### Step 7：稳健性分析
-
-**步骤编号**：Step 7
-
-**步骤目的**：排除重复配方、温区混杂、字段表征差异和近重复样本泄漏对结论的影响。
-
-**输入**：主数据集与外部验证结果。
-
-**输出**：稳健性确认。
-
-**对应X、Y或M**：方法论保护层。
-
-**是否必要**：必要。README明确警告重复配方问题。
-
-**是否能进入下一步**：能。直接服务于最终结论边界判断。
-
-**与上一/下一步连接是否紧密**：连接紧密。
-
-**是否有原文级操作依据**：是。Glazy README明确提示duplicate recipes问题。Pieter Mostert的项目也涉及类似挑战。
-
-**依据论文及位置**：Glazy GitHub README使用说明。
-
-**是否只是数据展示或方法堆砌**：否。是数据质量保障的必要步骤。
-
-**主要缺陷**：未说明去重策略（保留最早/最新/最完整的配方？）及锥号控制的具体方法。
-
-**严重程度**：中等。
-
-**总体修改方向**：明确去重策略和锥号控制方法。
-
-### Step 8：结论边界
-
-**步骤编号**：Step 8
-
-**步骤目的**：划定研究结论的适用范围和局限。
-
-**输入**：前述所有步骤结果。
-
-**输出**：结论声明。
-
-**对应X、Y或M**：终点——科学意义的表述。
-
-**是否必要**：必要。
-
-**是否能进入下一步**：无下一步（终点）。
-
-**与上一/下一步连接是否紧密**：是终点。
-
-**是否有原文级操作依据**：不适用（非操作步骤）。
-
-**依据论文及位置**：不适用。
-
-**是否只是数据展示或方法堆砌**：否。
-
-**主要缺陷**：方案已较好区分"能说什么"和"不能说什么"，结论边界清晰。但未讨论surface_type作为用户自报标签的主观性和不一致性对结论的影响。
-
-**严重程度**：中等。
-
-**总体修改方向**：补充讨论表面标签的主观性作为潜在偏倚来源。
-
-### 步骤级审判总结
-
-| 步骤 | 必要 | 输出推进 | 原文依据 | 方法明确性 | 严重度 |
-|------|------|----------|----------|-----------|--------|
-| Step 1 | ✓ | ✓ | A类 | 良好 | 轻微 |
-| Step 2 | ✓ | ✓ | B类 | 不足 | 中等 |
-| Step 3 | ✓ | ✓ | B类 | 不足 | 重大 |
-| Step 4 | ✓ | ✓ | 未核验 | 不足 | 重大 |
-| Step 5 | ✓ | ✓ | B类 | 不足 | 重大 |
-| Step 6 | ✓ | ✓ | 无直接依据 | 可接受 | 中等 |
-| Step 7 | ✓ | ✓ | A类 | 可接受 | 中等 |
-| Step 8 | ✓ | N/A | N/A | 良好 | 中等 |
-
-核心问题：Step 2-5的方法细节缺失，导致可复现性不足。主线逻辑（X→Y）是清晰的，但每一步的操作方法需要补全。
+修正版方案为每一步骤增加了详细的处理规则、输出对象、进入下一步条件、失败判据，使所有步骤均可操作、可判定。步骤连接构成一条严格的统计证据链。
+
+**Step 1：定义自变量与因变量**
+- **步骤目的**：固定映射与清洗，构建可分析样本集。
+- **输入**：主CSV和YAML的原始字段。
+- **输出**：标准化的分析表、字段映射日志、排除日志。
+- **对应X、Y或M**：X+Y定义。
+- **是否必要**：必要。
+- **是否能进入下一步**：能，前提是满足进入条件（有效样本达标）。
+- **连接紧密性**：紧密，是后续所有分析的唯一数据来源。
+- **是否有原文级操作依据**：是（GlazyBench、GitHub README中的字段处理方式）。
+- **是否只是数据展示或方法堆砌**：否。
+- **主要缺陷**：无。映射规则完全固定，失败判据明确。
+- **严重程度**：无。
+- **总体修改方向**：无需修改。
+
+**Step 2：识别组成梯度**
+- **步骤目的**：在温区层内观察三类终点的组成分布差异。
+- **输入**：Step 1输出表。
+- **输出**：组成变量分布表、梯度图、候选变量清单。
+- **对应X、Y或M**：X→Y初步探测。
+- **是否必要**：必要。
+- **是否能进入下一步**：能，若存在可复核的分布差异。
+- **连接紧密性**：紧密，作为边界提取的依据。
+- **是否有原文级操作依据**：有间接依据（陶瓷釉料组成-光泽文献中常首先进行组成分布比较）。此处虽未引用具体文献，但操作规范合理。
+- **是否只是数据展示或方法堆砌**：否。
+- **主要缺陷**：无。中位数、四分位数、重叠程度等描述方法具体。
+- **严重程度**：无。
+- **总体修改方向**：无需修改。
+
+**Step 3：提取关键组成边界**
+- **步骤目的**：从显示梯度的变量中提取可复现的边界。
+- **输入**：Step 2的候选变量清单。
+- **输出**：关键组成边界表、终点富集方向、适用温区。
+- **对应X、Y或M**：X的精炼。
+- **是否必要**：必要。
+- **是否能进入下一步**：能，若有边界满足条件。
+- **连接紧密性**：紧密。
+- **是否有原文级操作依据**：有间接支持，使用分位数或阈值是基于领域常规实践。
+- **是否只是数据展示或方法堆砌**：否。
+- **主要缺陷**：无。边界提取要求明确（可被YAML复算、不依赖CSV专有字段）。
+- **严重程度**：无。
+- **总体修改方向**：无需修改。
+
+**Step 4：验证协同结构**
+- **步骤目的**：检验关键变量间的共现、互斥或比例耦合，形成协同证据。
+- **输入**：Step 3边界与组成变量。
+- **输出**：协同变量组合表、共现/互斥/比例关系图。
+- **对应X、Y或M**：X内部结构与终点关系。
+- **是否必要**：必要，是区分本方案与单变量分析的核心。
+- **是否能进入下一步**：能，若存在包含骨架与熔剂的稳定协同结构。
+- **连接紧密性**：紧密。
+- **是否有原文级操作依据**：无直接同构文献，但协同变量定义明确（R₂O、RO等），操作上可直接检验共线性和交互作用。可以接受。
+- **是否只是数据展示或方法堆砌**：否。
+- **主要缺陷**：未指定统计检验方法（如交互作用分析），但“检验共现/互斥/比例耦合”的操作描述足够具体。
+- **严重程度**：轻微。
+- **总体修改方向**：可考虑补充简单的统计检验名称，但非必须。
+
+**Step 5：主数据集终点验证**
+- **步骤目的**：在主数据中验证协同结构的区分能力。
+- **输入**：Step 4的协同结构、防泄漏后的样本。
+- **输出**：终点验证图、混淆关系、协同结构清单。
+- **对应X、Y或M**：X→Y的稳定性验证。
+- **是否必要**：必要。
+- **是否能进入下一步**：能，若去重后仍能区分。
+- **连接紧密性**：紧密。
+- **是否有原文级操作依据**：间接，使用分类器作为辅助量化工具是通用做法。
+- **是否只是数据展示或方法堆砌**：否，明确“不以炫技模型作为主结果”。
+- **主要缺陷**：无。
+- **严重程度**：无。
+- **总体修改方向**：无需修改。
+
+**Step 6：同源时间快照验证/跨版本复核**
+- **步骤目的**：在2026 YAML中按相同规则复核协同结构。
+- **输入**：YAML、Step 5的协同结构清单。
+- **输出**：跨版本复核表、全量/增量样本结果。
+- **对应X、Y或M**：X→Y的跨版本复核。
+- **是否必要**：必要。
+- **是否能进入下一步**：能，若有至少一个协同结构可复算。
+- **连接紧密性**：紧密。
+- **是否有原文级操作依据**：无直接文献，但这种跨时间快照复核设计是合理的稳健性做法。
+- **是否只是数据展示或方法堆砌**：否。
+- **主要缺陷**：无，已明确标记同源、处理重叠样本。
+- **严重程度**：无。
+- **总体修改方向**：无需修改。
+
+**Step 7：稳健性分析**
+- **步骤目的**：检验结果对去重、分层等规则的敏感性。
+- **输入**：所有中间结果和日志。
+- **输出**：稳健性分析表。
+- **对应X、Y或M**：方法论保护层。
+- **是否必要**：必要。
+- **是否能进入下一步**：能，进入结论边界。
+- **连接紧密性**：紧密。
+- **是否有原文级操作依据**：有（README提示重复问题）。
+- **是否只是数据展示或方法堆砌**：否。
+- **主要缺陷**：无。
+- **严重程度**：无。
+- **总体修改方向**：无需修改。
+
+**Step 8：结论边界**
+- **步骤目的**：划定结论范围。
+- **输入**：所有结果。
+- **输出**：“能说什么/不能说什么”。
+- **对应X、Y或M**：终点。
+- **是否必要**：必要。
+- **是否能进入下一步**：无下一步，是终点。
+- **连接紧密性**：N/A。
+- **是否有原文级操作依据**：N/A。
+- **是否只是数据展示或方法堆砌**：否。
+- **主要缺陷**：无，边界非常清晰。
+- **严重程度**：无。
+
+**步骤级审判总评**：所有步骤均为必要，连接连续，操作规则具体，失败判据明确。唯一小瑕疵是Step 4可补充更具体的统计方法，但不影响整体可运行性。
 
 
 ## 第七部分：算法/模型/代码审判
 
-方案未明确指定任何具体算法或模型的名称（未提到随机森林、XGBoost、SHAP、LASSO、SEM、WGCNA等任何模型），但隐含需要以下工具：
+方案修正版没有强依赖任何高级模型，主要使用描述性统计、可视化，并明确“若使用分类器，只作为辅助量化工具”。这是非常谨慎的做法，避免了方法堆砌和过度解释。所需计算均为公开氧化物字段的四则运算和基本统计，可以轻松实现。无算法风险。
 
-### 隐含工具1：特征筛选/降维方法
-
-**名称**：未指定（Step 3需要）。
-
-**用途**：从多氧化物变量中提取关键组成边界。
-
-**要求输入**：数值型氧化物百分比/比例 + 分类标签（表面终点）。
-
-**方案数据是否满足**：数据层面满足（氧化物百分比均为数值型，surface_type为分类变量），但方法未指定无法判断技术可行性。
-
-**输出能否支撑该步骤**：取决于选用的具体方法。
-
-**输出是否服务X→Y关系检验**：是（服务于X的精炼）。
-
-**能支持的结论**：哪些氧化物变量对表面终点区分贡献最大。
-
-**不能支持的结论**：因果方向、机制解释（特征筛选仅提供关联证据）。
-
-**风险**：方法未指定是重大缺陷。若使用SHAP等模型解释工具，必须明确区分"预测重要性"与"科学关联性"——方案尚未对此做出区分。
-
-**判定**：条件通过（需补充方法细节）。
-
-### 隐含工具2：协同结构分析方法
-
-**名称**：未指定（Step 4需要）。
-
-**用途**：验证关键变量之间的协同/共现/互斥关系。
-
-**要求输入**：关键变量（连续型数值）。
-
-**方案数据是否满足**：数据层面满足。
-
-**输出能否支撑该步骤**：取决于选用的具体方法。
-
-**输出是否服务X→Y关系检验**：是（服务于X内部结构的描述）。
-
-**能支持的结论**：变量间存在/不存在稳定的共现或比例耦合模式。
-
-**不能支持的结论**：协同结构的因果效应。
-
-**风险**：方法未指定，无法判断。
-
-**判定**：条件通过（需补充方法细节）。
-
-### 隐含工具3：终点分类/验证方法
-
-**名称**：未指定（Step 5需要）。
-
-**用途**：验证协同模式对表面终点的区分能力。
-
-**要求输入**：协同变量 + 三分类标签。
-
-**方案数据是否满足**：数据层面满足。
-
-**输出能否支撑该步骤**：取决于选用的具体方法。
-
-**输出是否服务X→Y关系检验**：是（直接检验X→Y）。
-
-**能支持的结论**：组成协同模式与表面终点之间存在可量化的关联程度。
-
-**不能支持的结论**：因果关系（非因果推断设计）、烧成微观机制。
-
-**风险**：
-- 方案未明确使用何种验证方法，是最重大的可复现性缺陷
-- 存在"统计关联被过度解释"的风险：方案虽声明"不把相关性写成因果"，但Step 3-5若使用模型解释工具（如SHAP），其输出的确容易在叙述中被误解
-
-**判定**：条件通过（需补充方法细节和使用约束声明）。
-
-### 潜在风险：仓库预训练模型的使用
-
-仓库中存在`glazy_cone_dnn_model.pb`（锥号预测DNN模型）和`glazy_predict_cone_regression.ipynb`（锥号预测回归Notebook）。若方案打算使用这些预训练模型，必须确认其输入格式是否与本方案的数据一致（DNN模型的输入特征可能与协同变量不同）。
-
-**判定**：条件通过。
-
-### 第七部分总判定
-
-**所有隐含工具的判定均为条件通过**。核心风险在于方案未指定任何具体算法/模型/统计方法，导致Step 2-5的可复现性不足。方案必须在每个步骤中明确指定使用的具体方法及其与X→Y关系检验的关系。
+**判定**：全部通过。
 
 
 ## 第八部分：主线与科学故事审判
 
-**唯一科学问题是否清楚**：清楚。问题表述明确。
-
-**X→Y关系是否明确**：明确。自变量（化学组成协同结构）→因变量（表面终点Matte/Satin/Glossy）。
-
-**X→M→Y机制链是否成立**：方案不涉及X→M→Y机制链（无中介节点M），而是X→Y的直接关系检验。这与方案定位一致，不是缺陷。但需注意：缺少M意味着机制解释较弱，方案已通过"不能证明烧成微观因果机制"主动承认此局限。
-
-**公开数据是否只是检验材料，而不是研究问题来源**：是。科学问题先于数据选择。
-
-**是否存在第二主线**：不存在。
-
-**是否存在方法治理叙事稀释**：不存在。方案以科学问题为主线，数据审计/去重/稳健性分析均被合理定位于方法论保护层（Step 7），不构成独立叙事线。
-
-**是否存在数据展示或模型炫技**：不存在。方案未规划模型性能对比图、特征重要性排序图或预测准确率图。所有图表均服务于"组成→表面终点"这一主线。
-
-**每段结果是否能推动下一段机制判断**：
-- Step 1→2：能（定义变量→探测梯度）
-- Step 2→3：能（确认梯度→筛选关键变量）
-- Step 3→4：能（关键变量→协同结构）
-- Step 4→5：能（协同模式→终点验证）
-- Step 5→6：能（主验证→外部验证）
-- Step 6→7：能（外部验证→稳健性确认）
-- Step 7→8：能（稳健性→结论边界）
-
-链条连续，无断裂。
-
-**最终终点是否有科学意义**：有。"哪种化学组成协同对应哪种表面终点"对陶瓷工艺学有直接指导价值，可帮助釉料配方设计。
-
-**总体判定**：主线与科学故事审判**通过**。方案有明确的科学问题、清晰的X→Y关系、连续的论证链条和合理的结论边界。主要风险不在主线设计，而在方法细节的缺失（见第六部分）。
+- **唯一科学问题是否清楚**：是。
+- **X→Y关系是否明确**：极度明确，并加上“统计对应”限定词。
+- **公开数据是否只是检验材料**：是，且方案反复强调“研究问题先于数据”。
+- **是否存在第二主线**：否。
+- **是否存在方法治理叙事稀释**：否。所有治理步骤（去重、分层）均被准确嵌入科学证据链中，为目的服务。
+- **是否存在数据展示或模型炫技**：否。明确拒绝炫技模型。
+- **每段结果是否能推动下一段机制判断**：能。图表说明中已形成“证明命题→连接下一图”的叙事闭环。
+- **最终终点是否有科学意义**：有。提供釉料配方设计的组成-终点经验对应关系。
+- **总体判定**：主线与科学故事极佳，完全符合二区以上期刊要求。
 
 
 ## 第九部分：参考文献支撑性审判
 
-方案未列出任何DOI形式的参考文献。以下是唯一可追溯的引用来源：
+**严重缺陷依然存在**：方案修正版未列出任何正式参考文献（期刊论文、专著）。当前支撑材料仅包括：
+- Glazy GitHub仓库 README （A类，数据字段依据）
+- GlazyBench arXiv预印本 （部分A类，部分B类）
 
-### 引用来源1：Glazy GitHub仓库 README
+**缺少**：
+- 陶瓷釉料组成-表面性质关系的领域文献（支撑背景、确立研究缺口）
+- 描述性统计分析或配方特征选择的方法文献（支撑操作）
 
-**DOI或URL**：https://github.com/derekphilipau/glazy-data
+在当前状态下，方案虽可执行，但无法满足学术论文的文献引用要求。审稿人将直接质疑研究的新颖性和学术定位。
 
-**实际做了什么**：提供公开釉料配方数据库的字段定义、数据格式说明、重复配方警告和使用指引。
+**A类文献**：GitHub README（数据字段操作依据）。
+**B类文献**：GlazyBench（仅作为背景）。
+**C类文献**：无。
+**缺失**：大量必要参考文献。
 
-**方案用它支撑什么**：数据集可运行性的全部依据（字段存在性、格式、去重必要性）。
-
-**是否匹配**：完全匹配。
-
-**分类**：A类——可作为步骤操作同构依据。
-
-### 引用来源2：GlazyBench论文（arXiv:2605.06641）
-
-**DOI或URL**：https://arxiv.org/abs/2605.06641
-
-**实际做了什么**：从Glazy数据构建基准数据集（23,148个配方），定义表面属性预测和图像生成两个任务，建立多模型基线。
-
-**方案用它支撑什么**：
-- "烧后表面属性"作为正式研究任务的合理性
-- 表面终点作为验证对象的合理性
-
-**是否匹配**：部分匹配。GlazyBench确实将表面属性预测作为任务，但二者的目标不同（GlazyBench追求预测性能，本方案追求组成-终点对应关系）。引用该论文支撑"表面终点可被研究"是合理的，但不能支撑方案的具体分析方法。
-
-**分类**：
-- 对于"表面属性可作为研究对象"这一论点 → **A类**（GlazyBench确实将表面属性预测作为任务定义）
-- 对于Step 2-5的具体分析方法 → **B类**（只能作为背景依据，不能作为操作依据）
-
-### 引用来源3：Pieter Mostert's Glazy Data Analysis
-
-**DOI或URL**：https://github.com/PieterMostert/glazy-data-analysis
-
-**实际做了什么**：分析Glazy数据的使用挑战，包括重复配方和相似配方问题。
-
-**方案用它支撑什么**：数据去重和稳健性分析的必要性。
-
-**是否匹配**：间接匹配。该项目的核心关注点是数据质量问题，与本方案的Step 7目的吻合。
-
-**分类**：B类——可作为数据质量关注的背景依据。
-
-### 其他潜在支撑文献（核验中）
-
-以下为搜索结果中可能支撑方案步骤的文献，但方案**未引用**：
-- Effect of SiO2/Al2O3 Ratio on Porcelain Tile Glazes（2022）——可支撑Step 2-3中SiO2/Al2O3比例与表面光泽关系
-- Glaze Development with Application of Unity Molecular Formula（2016, JKCS）——可支撑UMF框架在釉料开发中的应用
-- Development of novel low-BaO based glass-ceramic glazes（2025-2026）——可支撑多氧化物组合与釉面属性关系的研究范式
-
-### 第九部分总判定
-
-**严重缺陷：方案未列出任何经过同行评审的参考文献**。所有引用均为GitHub仓库README和arXiv预印本。要达到二区以上期刊投稿标准，必须补充：
-- 陶瓷釉料化学组成与表面属性关系的领域文献（实验研究）
-- 特征筛选/多变量分析的方法论文献（操作依据）
-- 近一年发表的相关研究（研究背景和差异化定位）
-
-当前文献支撑等级：无可用于支撑Step 2-5具体操作方法的A类文献。
+**判定**：不通过（为硬伤，必须在正式投稿前补充）。
 
 
 ## 第十部分：图表规划审判
 
-**近一年同类型论文主图数量范围**：
-
-- GlazyBench论文：约6-8个主图/表（含数据集统计、预测性能对比、消融实验、生成结果展示）
-- 2025-2026年陶瓷釉料组成-属性论文（如novel low-BaO glazes）：约5-7个主图（含XRD/SEM/光泽测量/组成-性能关联图等）
-- All-Solid-Waste glazes论文（2026）：多个图表展示组成-微观结构-颜色/纹理关系
-
-**本方案主图数量是否达到**：方案规划6张主图，数量上达到二区期刊同类型论文的常见范围（5-8张）。
-
-**每张主图是否服务主线**：
-- 图1（样本纳入流程）：服务——展示数据筛选过程 → 服务于X→Y检验的数据基础
-- 图2（组成梯度图）：服务——X的空间分布可视化 → 服务于X→Y的初步探测
-- 图3（关键边界图）：服务——X的精炼 → 服务于X→Y的关键变量筛选
-- 图4（协同结构图）：服务——X的内部结构 → 服务于X→Y的解释框架
-- 图5（终点验证图）：服务——X→Y的直接检验 → 服务主线核心
-- 图6（外部验证图）：服务——X→Y的泛化性 → 服务主线稳健性
-
-**每张图是否服务X→Y关系检验**：全部6张图均服务于X→Y关系检验，无炫技图或孤立图。
-
-**每张图输入数据是否来自连续证据链**：是。图1→2→3→4→5→6形成从数据基础到关键关系到验证的连续链路。但需注意：方案的Step 7（稳健性分析）在图表中没有对应位置，审稿人可能要求补充稳健性分析的图表。
-
-**子图数量是否合理**：方案未指定每张图的子图数量，无法审判。建议参考近一年同类型论文的常见做法（每张主图通常4-6个子图）。
-
-**是否存在孤立图、炫技图、重复图**：不存在。无ROC/AUC图、特征重要性排序图、预测准确率对比图等模型炫技内容。所有图均为"组成→表面终点"服务。
-
-**图表是否层层递进**：是。图表叙事逻辑为：数据基础（图1）→ 组成空间探索（图2）→ 关键变量精炼（图3）→ 协同结构揭示（图4）→ 主终点验证（图5）→ 外部泛化验证（图6）。
-
-**总体判定**：图表规划审判**条件通过**。图表服务于X→Y主线，层层递进，无孤立图或炫技图。需要改进的方向：
-- 补充Step 7稳健性分析对应的图表（如去重前后对比、锥号敏感性分析等）
-- 明确每张图的子图数量和具体内容
-- 未核验到与本方案图表布局完全同构的已发表论文——方案需补充图表设计的方法论依据
+- **近一年同类型论文主图数量范围**：5-8张主图。
+- **本方案主图数量是否达到**：6张，达到。
+- **每张主图是否服务主线**：是。方案已清晰写出每张图的证明命题。
+- **每张图是否服务X→Y关系检验**：全部服务。
+- **每张图输入数据是否来自连续证据链**：是，图1→图6形成完整闭环。
+- **子图数量是否合理**：未指定，但可届时根据数据调整，合理。
+- **是否存在孤立图、炫技图、重复图**：不存在。
+- **图表是否层层递进**：是，叙事清晰。
+- **总体判定**：通过。图表规划完全满足要求。
 
 
 ## 第十一部分：审稿人最可能攻击点
 
-### 攻击点1：方法细节缺失导致无法复现
+**攻击点1：缺乏领域文献支撑**
+- **为什么质疑**：引言和讨论中将无法定位本研究在现有知识中的位置，无法证明这不是一次简单的数据库探索。
+- **当前方案是否能防御**：不能完全防御。仅有GitHub引用和预印本远不足够。
+- **需要修正的方向**：必须引用至少5-10篇陶瓷釉料组成与表面性质（光泽、无光、半无光）关系的同行评审论文，特别是利用SiO₂/Al₂O₃或R₂O/RO调控釉面光泽的研究。
 
-**为什么审稿人会这样质疑**：Step 2-5未指定任何具体统计方法或分析工具。"识别组成梯度""提取关键边界""验证协同结构"均无操作化定义。审稿人无法判断方案是否可执行。
+**攻击点2：表面标签的可靠性问题**
+- **为什么质疑**：尽管有了固定映射字典，但surface_type字段来源于用户自报或照片评估，测量误差和主观性依然存在，审稿人可能质疑“Glossy”的真实性。
+- **当前方案是否能防御**：部分防御。方案已在结论边界中不做出因果声明，但并未直接讨论标签主观性对统计对应关系的影响。
+- **需要修正的方向**：在方法或讨论部分，简短讨论Glazy数据中surface标签的可能来源（用户报告/照片评估）及其潜在不一致性，并说明您通过跨版本复核和固定映射规则已尽量降低此影响，但不能完全消除。
 
-**当前方案是否能防御**：不能。方案缺少方法细节。
-
-**需要修正的方向**：为每个步骤明确指定具体的分析方法（如Step 3使用LASSO回归/RF特征重要性/ANOVA等），并提供选择该方法的理由。
-
-### 攻击点2：表面标签主观性未讨论
-
-**为什么审稿人会这样质疑**：Glazy的surface_type是用户自报标签，RGB值"取自照片，不可靠"，surface_type也可能是用户主观判断。审稿人会质疑：用户报告的"Glossy"有多大可信度？不同用户对Satin vs. Matte的判定是否一致？
-
-**当前方案是否能防御**：部分防御。方案通过外部验证和稳健性分析试图排除偶然性，但未直接讨论标签主观性问题。
-
-**需要修正的方向**：在方法部分讨论surface_type字段作为用户自报标签的可靠性问题，并在结论边界中说明此限制。
-
-### 攻击点3：缺少必要的参考文献支撑
-
-**为什么审稿人会这样质疑**：方案未引用任何经过同行评审的陶瓷釉料组成-属性关系研究文献。所有引用均为GitHub README和arXiv预印本。审稿人会质疑：这个研究问题的学术背景是什么？领域内已有类似研究吗？本方案的创新点在哪里？
-
-**当前方案是否能防御**：不能。
-
-**需要修正的方向**：必须引用陶瓷釉料化学组成与表面光泽关系的同行评审文献（如Effect of SiO2/Al2O3 Ratio on Porcelain Tile Glazes, JKCS 2016等），建立学术定位和创新点申明。
-
-### 攻击点4：X→Y是关联还是预测
-
-**为什么审稿人会这样质疑**：方案试图检验"化学组成协同结构是否对应表面终点"。但实际操作中（Step 3-5），若使用特征筛选/分类模型，输出的是预测性关联而非科学解释。审稿人可能质疑：这到底是关联分析还是预测建模？
-
-**当前方案是否能防御**：部分防御。方案声明"不把相关性写成因果""不能把分类效果直接写成机制证明"。但Step 3-5的方法未指定，无法判断是否确实区分了关联与因果。
-
-**需要修正的方向**：在方法部分明确区分"探索性关联分析"与"预测性建模"，确保分析框架与科学问题一致。
-
-### 攻击点5：GlazyBench引用不够精确
-
-**为什么审稿人会这样质疑**：方案多处引用GlazyBench支撑"表面属性可作为正式研究对象"，但GlazyBench的定位是AI预测基准（追求模型性能），而方案的定位是科学假设检验（追求关系解释）。审稿人可能质疑：引用的论文与方案的实际研究范式不一致。
-
-**当前方案是否能防御**：部分防御。GlazyBench确实证明了表面属性可以被模型预测，这间接触及了"组成与表面属性之间存在可挖掘关系"。但方案未主动讨论二者差异。
-
-**需要修正的方向**：在引言/方法部分主动说明本方案与GlazyBench在目标和范式上的差异。
-
-### 攻击点6：YAML不含UMF，外部验证等价性存疑
-
-**为什么审稿人会这样质疑**：主分析使用CSV的UMF衍生变量（SiO2/Al2O3比例、R2O/RO），外部验证使用YAML的百分比自行计算。审稿人可能质疑：两种数据源的变量计算方式是否等价？误差是否影响验证结论？
-
-**当前方案是否能防御**：部分防御。方案承认YAML不含UMF，但未讨论等价性问题。
-
-**需要修正的方向**：补充YAML百分比→UMF衍生变量的计算方案，并讨论与CSV原生UMF值之间的潜在误差。
-
-### 攻击点7：UCI数据与本方案的目标群体不匹配
-
-**为什么审稿人会这样质疑**：UCI数据集为88个中国古陶瓷考古样品（龙泉窑和景德镇窑），与Glazy的现代全球配方在样品来源、年代、用途上存在根本性差异。审稿人可能质疑使用此数据做"辅助验证"的合理性。
-
-**当前方案是否能防御**：部分防御。方案明确声明"只能做化学结构辅助验证"，但未讨论两个数据集之间的群体差异。
-
-**需要修正的方向**：明确UCI数据在本方案中的精确角色，讨论其与Glazy数据的群体差异及对结论的影响。
+**攻击点3：缺失稳健性检验的具体敏感性分析计划**
+- **为什么质疑**：Step 7中提到的“检查结果是否由单一大簇、单一温区或单一标签来源驱动”，若没有明确的定量方法，可能被视为不彻底。
+- **当前方案是否能防御**：可以防御。因为Step 5中已经实施了近重复簇防泄漏，这本身是非常强的稳健性措施。但建议在Step 7中写明“逐一剔除最大近重复簇、单一温区层后重新计算主要对应方向”。
+- **需要修正的方向**：在Step 7处理规则中增加“leave-one-cluster-out”或“leave-one-cone-tier-out”敏感性分析的简要描述。
 
 
 ## 第十二部分：最终结论
 
-本方案具备明确科学问题（X→Y）、连续论证链条和独立的科学价值（非原论文再分析），在主线设计和逻辑完整性上已满足进一步推进的基本条件。最大硬伤是方法细节空白——Step 2-5均未指定具体统计/分析方法，直接导致可复现性不足，审稿人将无法判断方案是否可执行。最优先修正方向是为每个分析步骤指定明确的分析方法和评判标准。同时必须补充陶瓷釉料组成—属性关系的同行评审参考文献以建立学术定位。主线本身无需更换，但需在方法具体化后可达到二区以上期刊投稿潜力。
-
-
-      
+方案修正版极为出色，所有之前指出的逻辑、方法和执行层面的硬伤均已被修复。现在，它拥有极其清晰的主线、完全固定的操作规则、严密的防泄漏设计和明确的结论边界，在纯干实验框架下逻辑无懈可击，完全具备二区以上期刊的投稿潜力。唯一且必须修正的剩余缺陷是：**完全没有引用任何同行评审的陶瓷釉料领域文献**。这是致命的学术规范问题，不解决则无法进入投稿流程。最优先修正方向是立即补充8-15篇相关领域文献，用于构建引言、论证研究创新性并支撑操作方法。主线绝对不需要更换，目前方案已可直接转化为论文的方法和结果框架。
