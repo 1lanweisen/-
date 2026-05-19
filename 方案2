@@ -1,0 +1,555 @@
+Phase D 最终稿：Glazy RGB 研究方案执行版
+格式参照最新上传 Word 文件；本版仅做三处收口优化：Step 2 DOI 对齐、Step 3/5 配对统计检验对象锁定、Fig3d 阈值线图注锁定；不改主线、不改步骤。
+________________________________________
+0. 锁定问题与不可变边界
+唯一科学问题：
+在 Glazy 公共釉料记录中，extended UMF + cone 是否稳定关联 RGB。
+不可变硬规则：
+1.	atmosphere_cn 仅用于 Cu/Fe 解释边界，不得进入主模型主线。
+2.	SHAP 仅作模型关联解释，不得写成因果机制。
+3.	不做方法论论文叙事，不做 benchmark 堆砌。
+4.	主 learner 固定 LightGBM，RandomForest 仅作稳健性补充。
+5.	所有未复算数字必须标注“待确认”。
+6.	失败即降级，不补故事。
+7.	RGB 仅接受 0–255 数值。
+8.	cone 统一序尺度编码，不可解析记缺失。
+9.	_umf 统一数值化，缺失编码全程一致。
+10.	atmosphere_cn 仅允许：氧化 / 还原 / 氧化还原 / 无。
+________________________________________
+1. 核心参考论文池与图型使用边界
+代号	论文	DOI / arXiv	本方案使用方式
+G2026	GlazyBench: A Benchmark for Ceramic Glaze Property Prediction and Image Generation	arXiv:2605.06641；DOI:10.48550/arXiv.2605.06641	支撑 Glazy 釉料记录、UMF、cone/firing condition、RGB regression 与 baseline 输入结构。
+D2021	Datasheets for Datasets	DOI:10.1145/3458723；arXiv:1803.09010	支撑字段、样本、缺失、数据边界与使用限制的结构化记录。
+M2019	Model Cards for Model Reporting	DOI:10.1145/3287560.3287596；arXiv:1810.03993	支撑按子集报告模型表现、默认色风险、边界条件与降级说明。
+L2024	A color prediction model for mending materials based on machine learning	DOI:10.1186/s40494-024-01295-1	支撑颜色预测任务中使用机器学习与 SHAP 解释输入贡献。
+Z2024	Interpretable machine learning for inorganic melts and glasses	DOI:10.3389/fmats.2024.1412701	支撑材料性质预测中 composition 与 condition 输入、SHAP 关联解释。
+C2017	Chromatic Characteristics of Copper Glaze as a Function of Copper Oxide Addition and Sintering Atmosphere	DOI:10.4191/kcers.2017.54.1.04	支撑 Cu 相关颜色解释必须考虑气氛边界。
+P2022	Exploring the Colors of Copper-Containing Pigments, Copper Oxide and Malachite	DOI:10.3390/colorants1040023	支撑 Cu 相关釉色与还原环境/烧成条件相关，仅作为边界依据。
+________________________________________
+2. 完整执行步骤方案（Step 0–Step 9）
+Step 0. 主线锁定
+A. 本步目标
+锁定唯一主问题：在 Glazy 公共釉料记录中，extended UMF + cone 是否稳定关联 RGB。
+B. 输入字段
+主输入字段：全部实际存在的 _umf 字段、from_orton_cone、to_orton_cone。
+主输出字段：rgb_r、rgb_g、rgb_b。
+边界字段：atmosphere_cn，仅用于 Cu/Fe 解释边界。
+禁止主线化字段：surface_type、transparency_type、material_type。
+C. 数据结构核查
+确认 RGB 为唯一终点；确认 atmosphere_cn 不进入主模型；确认 SHAP 仅用于模型关联解释；确认不新增模型族。
+D. 方法动作
+主线冻结 → C1/C2 claim 边界确认 → 禁止变量排除 → 图表链绑定。
+E. 输出产物
+主 claim C1：extended UMF + cone 是否稳定关联 RGB。
+辅助边界 claim C2：Cu/Fe 解释是否受 atmosphere_cn 约束。
+Anti-claims：默认色主导、扩展 UMF 无增量、Cu/Fe 气氛混杂。
+F. 本步方法 DOI
+arXiv:2605.06641；DOI:10.48550/arXiv.2605.06641。
+G. 与前一步衔接 DOI
+起始步，无前一步。
+H. 可执行性断言
+条件能跑。只要原始 Glazy 数据表、RGB、cone 与 _umf 字段可定位，即可进入 E0 复算。
+I. 降级路径
+若出现第二终点 → 删除。
+若 atmosphere_cn 被写入主模型 → 删除并改为 Cu/Fe 边界。
+若 SHAP 被写成因果 → 改为“模型关联贡献”。
+________________________________________
+Step 1. E0 数据复算闸门
+A. 本步目标
+复算所有字段、样本、比例、编码与阈值入口；未复算数字一律标注“待确认”。
+B. 输入字段
+全表行数、列数、字段名；material_state、is_private、is_theoretical、is_analysis；rgb_r/g/b；from_orton_cone/to_orton_cone；全部 _umf 字段；atmosphere_cn。
+C. 数据结构核查
+字段必须存在并可解析；RGB 仅接受 0–255；cone 必须统一序尺度编码；_umf 必须统一数值化；atmosphere_cn 仅允许四类。
+D. 方法动作
+字段存在性复算 → 类型检查 → 缺失率统计 → RGB 合法性检查 → 默认白黑比例统计 → cone 可解析性检查 → UMF 字段清单 → 生成 D_main / D_no_default / D_atm。
+E. 输出产物
+Table1 输入数据；复算清单；样本闸门结果；字段状态表。
+F. 本步方法 DOI
+DOI:10.1145/3458723；arXiv:1803.09010。
+G. 与前一步衔接 DOI
+arXiv:2605.06641；DOI:10.48550/arXiv.2605.06641。
+H. 可执行性断言
+条件能跑。只要原始数据可读取，即可完成字段、样本、比例和编码复算。
+I. 降级路径
+缺 RGB 主字段 → 停止 E1。
+缺 cone 主字段 → 停止 E1。
+无可用 _umf 字段 → 停止 E1。
+D_main_n < 1000 → 主实验不运行。
+D_no_default_n < 500 → 非默认色稳定 claim 不检验。
+D_atm_n < 100 → Cu/Fe 气氛边界 claim 不检验。
+________________________________________
+Step 2. 样本口径桥接（D_main / D_no_default / D_atm）
+A. 本步目标
+明确 D_main、D_no_default、D_atm 的包含关系，防止跨不兼容子集混画。
+B. 输入字段
+D_main：状态字段、合法 RGB、可解析 cone、全部 _umf。
+D_no_default：D_main 删除 255,255,255 与 0,0,0。
+D_atm：D_main 中 atmosphere_cn != 无。
+Cu/Fe 子集：D_atm 中 Cu/Fe UMF 字段非零样本。
+C. 数据结构核查
+每个子集必须保留同一 sample_id；同一比较必须共享样本定义、split、seed 与 metric；D_atm 不得回推主模型性能。
+D. 方法动作
+构建 D_main → 构建 D_no_default → 构建 D_atm → 记录样本流失 → 建立桥接表。
+E. 输出产物
+样本桥接表；Fig1 输入；Table1 子集口径；图表可比性说明。
+F. 本步方法 DOI
+DOI:10.1145/3458723；arXiv:1803.09010。
+DOI:10.1145/3287560.3287596；arXiv:1810.03993。
+arXiv:2605.06641；DOI:10.48550/arXiv.2605.06641。
+支撑点：
+Datasheets for Datasets 支撑数据组成、字段、子集来源与使用边界记录；Model Cards 支撑分组/子集表现报告；GlazyBench 支撑 Glazy 数据中 UMF、cone、RGB 任务口径及主样本进入预测任务的流程位置。
+G. 与前一步衔接 DOI
+DOI:10.1145/3458723；arXiv:1803.09010。
+H. 可执行性断言
+条件能跑。只要 E0 输出样本标记，即可建立 D_main / D_no_default / D_atm 桥接链。
+I. 降级路径
+子集不可桥接 → 不作直接比较。
+D_atm 结果被写成主模型证据 → 改为边界说明。
+Cu/Fe 单字段非零样本 < 30 → 不解释该字段方向。
+________________________________________
+Step 3. E1 主实验（M_full vs B0/B1/B2）
+A. 本步目标
+检验 M_full 是否相对 B1 达到主 claim C1 的硬阈值。
+B. 输入字段
+B0：训练集 RGB 均值。
+B1：GlazyBench-like UMF + cone。
+B2：extended UMF only。
+M_full：extended UMF + from_orton_cone + to_orton_cone。
+输出：rgb_r/g/b。
+样本：D_main。
+C. 数据结构核查
+同一比较必须使用同一 D_main、同一 split、同一 seed、同一 metric；RandomForest 不进入主图排行。
+D. 方法动作
+80/20 split → seeds=2026/2027/2028 → LightGBM 训练 → B0/B1/B2/M_full 比较 → 统计 CI 与 p 值。
+统计检验对象固定为：同一 split/seed 下 M_full 与 B1 的 Mean_MAE 配对差值，即
+Δ_seed = Mean_MAE_B1,seed - Mean_MAE_M_full,seed。
+C1 的统计判定基于 3 个 seed 的配对差值、95% CI 与 p 值，不使用非配对模型误差比较。
+E. 输出产物
+Fig2；主性能表；M_full 相对 B1 改进率；C1 初判。
+F. 本步方法 DOI
+arXiv:2605.06641；DOI:10.48550/arXiv.2605.06641。
+G. 与前一步衔接 DOI
+DOI:10.1145/3287560.3287596；arXiv:1810.03993。
+H. 可执行性断言
+条件能跑。D_main 满足样本下限且特征可用时，可运行 LightGBM RGB 三通道回归。
+I. 降级路径
+M_full 相对 B1 Mean_MAE 降低 < 5% → C1 主增量失败。
+p ≥ 0.05 → C1 主增量失败。
+95% CI 跨 0 → C1 主增量失败。
+允许写法：“在当前复算样本与预设阈值下，未观察到 extended UMF + cone 相对 GlazyBench-like 输入的稳定增量。”
+________________________________________
+Step 4. E2 默认色主导检验
+A. 本步目标
+检验 E1 主性能是否由默认白/黑 RGB 样本主导。
+B. 输入字段
+E1 同一 D_main 测试集；默认白：255,255,255；默认黑：0,0,0；非默认色：其余合法 RGB；B1 与 M_full 预测结果。
+C. 数据结构核查
+不重训；只在 E1 同一测试集上分组；默认色与非默认色不得与 D_no_default 重训结果混画。
+D. 方法动作
+分组 → 计算 Mean_MAE → 计算 dominance_score → 判断默认色主导风险。
+E. 输出产物
+Fig3a；Fig3b；默认色主导判定；C1 降级输入。
+F. 本步方法 DOI
+DOI:10.1145/3287560.3287596；arXiv:1810.03993。
+G. 与前一步衔接 DOI
+arXiv:2605.06641；DOI:10.48550/arXiv.2605.06641。
+H. 可执行性断言
+条件能跑。E1 预测结果存在时，可直接计算默认色与非默认色分组误差。
+I. 降级路径
+dominance_score > 0.30 且非默认色改进 < 3% → 默认色主导风险。
+允许写法：“主性能存在默认白/黑 RGB 样本主导风险，因此 C1 降级为默认颜色敏感的统计关联。”
+________________________________________
+Step 5. E3 删除默认色重训 + SHAP
+A. 本步目标
+在 D_no_default 上重新训练并解释，检验非默认色中 C1 是否仍成立。
+B. 输入字段
+D_no_default；extended UMF；from_orton_cone；to_orton_cone；rgb_r/g/b；解释字段仅限 nonzero_n >= 30 的 UMF 字段与 cone。
+C. 数据结构核查
+D_no_default 与 D_main 分开报告；SHAP 只在通过性能阈值后的模型上计算；低频字段不解释方向。
+D. 方法动作
+D_no_default 80/20 split → LightGBM 重训 → M_full vs B1 → SHAP 计算 → 稳定字段解释。
+统计检验对象固定为：同一 split/seed 下 M_full 与 B1 的 Mean_MAE 配对差值，即
+Δ_seed_no_default = Mean_MAE_B1,seed - Mean_MAE_M_full,seed。
+非默认色稳定性判定基于 3 个 seed 的配对差值、95% CI 与 p 值，不使用非配对模型误差比较。
+E. 输出产物
+Fig3c；Fig4；非默认色性能；SHAP 排序；解释降级标记。
+F. 本步方法 DOI
+DOI:10.1186/s40494-024-01295-1；DOI:10.3389/fmats.2024.1412701。
+G. 与前一步衔接 DOI
+DOI:10.1145/3287560.3287596；arXiv:1810.03993。
+H. 可执行性断言
+条件能跑。D_no_default 达到样本下限且特征完整时，可重训并计算 SHAP。
+I. 降级路径
+D_no_default_n < 500 → 非默认色稳定 claim 不检验。
+M_full 相对 B1 改进 < 3% → 非默认色证据不足。
+SHAP 主要字段方向反转 → 解释降级。
+允许写法：“删除默认白/黑后，非默认色稳定关联证据不足。”
+________________________________________
+Step 6. E4 气氛边界（A_sub vs B，仅 Cu/Fe）
+A. 本步目标
+只在 D_atm 中检验 Cu/Fe 解释是否受气氛边界影响。
+B. 输入字段
+A_sub：extended UMF + cone。
+B：extended UMF + cone + atmosphere_cn 派生编码。
+样本：D_atm。
+目标字段：CuO、Cu2O、FeO、Fe2O3 对应 UMF 字段。
+输出：RGB。
+C. 数据结构核查
+D_atm 只用于 Cu/Fe 边界；B 不得替代主模型；atmosphere_cn 不得写成工艺真值。
+D. 方法动作
+D_atm 子集提取 → A_sub vs B 训练 → Cu/Fe SHAP 方向、rank、mean_abs_SHAP 比较 → C2 判定。
+E. 输出产物
+Fig5；Cu/Fe 边界表；C2 判定。
+F. 本步方法 DOI
+DOI:10.4191/kcers.2017.54.1.04；DOI:10.3390/colorants1040023。
+G. 与前一步衔接 DOI
+DOI:10.1186/s40494-024-01295-1；DOI:10.3389/fmats.2024.1412701。
+H. 可执行性断言
+条件能跑。D_atm 达到样本下限且 Cu/Fe 字段非零样本足够时，可运行边界对照。
+I. 降级路径
+D_atm < 100 → C2 不检验。
+Cu/Fe 单字段 nonzero_n < 30 → 不解释该字段。
+方向反转或 mean_abs_SHAP 下降 ≥ 50% → Cu/Fe 解释气氛敏感。
+允许写法：“Cu/Fe 解释对气氛补录敏感，不能作稳定方向表述。”
+________________________________________
+Step 7. 图表生产（Fig1/Table1/Fig2/Fig3/Fig4/Fig5/Table3）
+A. 本步目标
+固定论文图表链，确保每张图表只服务一个 claim 与一个样本口径。
+B. 输入字段
+Fig1：E0 样本流、变量模块、C1/C2 边界。
+Table1：E0 复算字段、样本、比例、编码。
+Fig2：E1 D_main 性能。
+Fig3：E2 默认色误差 + E3 D_no_default 重训。
+Fig4：E3 SHAP。
+Fig5：E4 Cu/Fe 气氛边界。
+Table3：E1–E4 成功/失败/降级判定。
+C. 数据结构核查
+图表不得使用未复算数值；跨子集必须通过 Fig1/Table1 桥接；不兼容步骤输出不得直接混画。
+D. 方法动作
+按 Fig1 → Table1 → Fig2 → Fig3 → Fig4 → Fig5 → Table3 顺序生产。
+E. 输出产物
+7 个主文图表：Fig1、Table1、Fig2、Fig3、Fig4、Fig5、Table3。
+F. 本步方法 DOI
+DOI:10.1145/3287560.3287596；arXiv:1810.03993；DOI:10.1145/3458723；arXiv:1803.09010。
+G. 与前一步衔接 DOI
+DOI:10.4191/kcers.2017.54.1.04；DOI:10.3390/colorants1040023。
+H. 可执行性断言
+条件能跑。E0–E4 输出存在时，可生成完整图表链。
+I. 降级路径
+图表口径不一致 → 不出图。
+Fig4 写因果 → 改写。
+Fig5 回推主性能 → 改写。
+Table3 新增 claim → 删除新增 claim。
+________________________________________
+Step 8. 失败→降级决策树落地
+A. 本步目标
+把所有失败路径转化为固定论文写法，避免失败后补故事。
+B. 输入字段
+E0 样本量、字段、比例、编码状态；E1 改进率、p、CI；E2 dominance_score；E3 非默认色改进与 SHAP；E4 D_atm、Cu/Fe 非零样本、方向变化、SHAP 强度变化。
+C. 数据结构核查
+C1 必须由 E1+E2+E3 同时支持；C2 仅由 E4 支持；任何失败不得新增主线。
+D. 方法动作
+判断 C1 → 判断默认色风险 → 判断非默认色稳定性 → 判断 C2 → 写入 Table3。
+E. 输出产物
+Table3；结果段降级模板；Go/No-Go 输入。
+F. 本步方法 DOI
+DOI:10.1145/3287560.3287596；arXiv:1810.03993。
+G. 与前一步衔接 DOI
+DOI:10.1145/3458723；arXiv:1803.09010。
+H. 可执行性断言
+条件能跑。E1–E4 输出存在时，可按硬阈值生成降级结论。
+I. 降级路径
+E1 失败 → 不声称 extended UMF + cone 有稳定增量。
+E2 失败 → C1 降级为默认颜色敏感关联。
+E3 失败 → 非默认色稳定关联证据不足。
+E4 失败 → Cu/Fe 不作稳定方向表述。
+________________________________________
+Step 9. Final Go/No-Go
+A. 本步目标
+根据 E0–E4 的硬阈值输出唯一最终状态。
+B. 输入字段
+D_main_n、D_no_default_n、D_atm_n；M_full vs B1 改进率；p 与 95% CI；dominance_score；D_no_default 改进率；Cu/Fe 方向与 SHAP 强度变化。
+C. 数据结构核查
+任何复算项待确认，均不得进入投稿结论。
+任何硬阈值失败，均按 Step 8 降级。
+所有图表必须同链。
+D. 方法动作
+检查 E0 → 检查 E1 → 检查 E2 → 检查 E3 → 检查 E4 → 输出 Go/No-Go。
+E. 输出产物
+最终状态：
+GO for experiments; NO submission
+或
+GO for submission draft。
+F. 本步方法 DOI
+原文依据不足：仅可作为工程性执行步骤，不上升为科学贡献。
+G. 与前一步衔接 DOI
+DOI:10.1145/3287560.3287596；arXiv:1810.03993。
+H. 可执行性断言
+条件能跑。只要 E0–E4 的判定字段存在，即可生成最终状态。
+I. 降级路径
+E0–E4 未完成 → GO for experiments; NO submission。
+全部阈值满足 → GO for submission draft。
+当前状态：GO for experiments; NO submission。
+________________________________________
+3. 达标版主图规划（Fig.1–Fig.5；每张 4 个子图）
+Fig.1｜Problem-anchored Glazy RGB workflow
+对应步骤： Step 0–Step 2
+图型： workflow / pipeline diagram
+子图数量： 4
+服务 claim： C1
+同构依据： arXiv:2605.06641；DOI:10.1145/3458723
+数据来源文件： E0 复算表、字段清单、样本桥接表
+Fig.1a：主线变量 DAG
+横轴：输入模块 → 模型模块 → 输出模块。
+纵轴：无定量轴；纵向分为主输入、边界输入、禁止主线化变量。
+颜色：extended UMF 深蓝；cone 橙；RGB 绿色；atmosphere_cn 灰紫虚线；禁止变量灰色。
+一句话结论：主线只允许 extended UMF + cone → RGB。
+Fig.1b：样本流桥接图
+横轴：raw data → D_main → D_no_default → D_atm。
+纵轴：样本数，全部为复算后数值；复算前标注“待确认”。
+颜色：D_main 蓝；D_no_default 橙；D_atm 灰紫。
+一句话结论：D_no_default 与 D_atm 只是稳健性/边界子集，不替代 D_main。
+Fig.1c：输入字段分层图
+横轴：字段类别。
+纵轴：字段数量或字段状态，复算前标注“待确认”。
+类别：extended UMF、cone、RGB、atmosphere_cn、excluded metadata。
+颜色：主输入蓝；主输出绿；边界字段灰紫；禁止主线化字段灰。
+一句话结论：只有 extended UMF 与 cone 进入主模型，RGB 是唯一终点。
+Fig.1d：C1/C2/Anti-claims 边界图
+横轴：claim 类型。
+纵轴：证据层级。
+类别：C1、C2、默认色 anti-claim、气氛混杂 anti-claim。
+颜色：C1 蓝；C2 灰紫；anti-claims 灰橙。
+一句话结论：C1 是唯一主 claim，C2 只用于 Cu/Fe 边界解释。
+禁止混入内容：
+不放模型性能；不把 atmosphere_cn 画成主输入；不加入 surface/transparency 任务。
+________________________________________
+Table1｜E0 数据复算总表
+对应步骤： Step 1–Step 2
+图型： 主文数据表
+服务 claim： C1
+同构依据： DOI:10.1145/3458723；arXiv:1803.09010
+数据来源文件： 字段复算表、样本复算表、缺失率表、编码检查表
+模块	项目	字段	输出	状态
+原始数据	行列规模	全表	raw_n_rows / raw_n_cols	待确认
+RGB	合法性	rgb_r/g/b	合法 RGB 数、非法 RGB 数	待确认
+默认色	默认白/黑比例	255,255,255；0,0,0	数量与比例	待确认
+cone	可解析性	from_orton_cone/to_orton_cone	可解析率、缺失数	待确认
+UMF	字段清单	_umf	字段数、缺失率、非零计数	待确认
+样本	D_main	主筛选字段	样本数	待确认
+样本	D_no_default	删除默认白/黑	样本数	待确认
+样本	D_atm	atmosphere_cn != 无	样本数	待确认
+________________________________________
+Fig.2｜E1 主实验性能图
+对应步骤： Step 3
+图型： performance bar plot + CI + threshold panel
+子图数量： 4
+服务 claim： C1
+同构依据： arXiv:2605.06641；DOI:10.48550/arXiv.2605.06641
+数据来源文件： E1 模型输出表、误差统计表
+Fig.2a：Mean_MAE 主指标对比
+横轴：B0、B1、B2、M_full。
+纵轴：Mean_MAE。
+误差线：95% CI。
+颜色：B0 灰；B1 蓝灰；B2 橙灰；M_full 深蓝。
+一句话结论：M_full 是否在 D_main 中降低 RGB 平均误差。
+Fig.2b：RGB_Euclidean_Error 对比
+横轴：B0、B1、B2、M_full。
+纵轴：RGB_Euclidean_Error。
+误差线：95% CI。
+颜色与 Fig.2a 一致。
+一句话结论：主结论在联合 RGB 误差上是否一致。
+Fig.2c：相对 B1 改进率
+横轴：B0、B2、M_full。
+纵轴：相对 B1 的误差降低百分比。
+参考线：Δ_main_min = 5%。
+颜色：达到阈值深蓝；未达阈值浅灰。
+一句话结论：M_full 是否跨过主 claim 的 5% 增量阈值。
+Fig.2d：三通道 MAE 分解
+横轴：R、G、B 通道。
+纵轴：MAE。
+分组：B1、M_full。
+误差线：95% CI。
+一句话结论：M_full 的改进是否由单一 RGB 通道异常驱动。
+禁止混入内容：
+不加入 RandomForest 排行；不放 D_no_default；不放 D_atm；不放 SHAP。
+________________________________________
+Fig.3｜默认色与非默认色稳健性图
+对应步骤： Step 4–Step 5
+图型： grouped error plot + threshold plot + retraining panel
+子图数量： 4
+服务 claim： C1
+同构依据： DOI:10.1145/3287560.3287596；arXiv:1810.03993
+数据来源文件： E2 分组误差表、E3 重训误差表
+Fig.3a：D_main 内默认色 vs 非默认色误差
+横轴：默认白黑组、非默认色组。
+纵轴：Mean_MAE。
+分组：B1、M_full。
+颜色：默认色灰；非默认色蓝。
+一句话结论：主性能是否主要来自默认白/黑样本。
+Fig.3b：dominance_score 阈值图
+横轴：seed。
+纵轴：dominance_score。
+参考线：dominance_thresh = 0.30。
+颜色：未触发蓝；触发风险紫红。
+一句话结论：默认色主导风险是否超过预设阈值。
+Fig.3c：D_no_default 重训误差
+横轴：B1、M_full。
+纵轴：Mean_MAE。
+误差线：95% CI。
+参考标注：Δ_nondefault_min = 3%。
+一句话结论：删除默认白/黑后，非默认色中 C1 是否仍成立。
+Fig.3d：D_main 与 D_no_default 改进率桥接
+横轴：D_main、D_no_default。
+纵轴：M_full 相对 B1 的误差降低百分比。
+参考线：D_main 为 5%；D_no_default 为 3%。
+颜色：达标深蓝；未达标灰；触发降级紫红。
+一句话结论：C1 是否同时通过主样本和非默认色样本两道闸门。
+图注锁定句：D_main 阈值线 5%、D_no_default 阈值线 3% 仅用于各自门槛判定，不用于跨口径性能优劣断言。
+禁止混入内容：
+不把 D_main 与 D_no_default 当作同一总体直接比较；不把默认色检验写成数据治理主线。
+________________________________________
+Fig.4｜D_no_default SHAP 模型关联解释图
+对应步骤： Step 5
+图型： SHAP beeswarm + importance + stability + eligibility matrix
+子图数量： 4
+服务 claim： C1
+同构依据： DOI:10.1186/s40494-024-01295-1；DOI:10.3389/fmats.2024.1412701
+数据来源文件： E3 SHAP 表、字段非零样本表、E3 模型输出表
+Fig.4a：SHAP beeswarm
+横轴：SHAP value。
+纵轴：特征名。
+颜色：特征值高低。
+样本口径：D_no_default。
+一句话结论：通过非默认色稳健性后的模型关联贡献分布。
+Fig.4b：Top features mean_abs_SHAP
+横轴：mean_abs_SHAP。
+纵轴：Top features。
+颜色：UMF 蓝；cone 橙。
+一句话结论：哪些 extended UMF 或 cone 字段对模型预测贡献最高。
+Fig.4c：RGB 通道分解 SHAP 热图
+横轴：R、G、B 通道。
+纵轴：Top features。
+颜色：mean_abs_SHAP 强度。
+一句话结论：字段贡献是否集中在某一 RGB 通道，或跨通道保持一致。
+Fig.4d：解释资格与稳定性标记
+横轴：Top features。
+纵轴：解释状态。
+类别：可解释、低频不解释、方向不稳定、仅报告贡献。
+颜色：可解释蓝；低频灰；不稳定紫红。
+一句话结论：低频或不稳定字段不得作方向解释。
+禁止混入内容：
+不写因果；不解释 nonzero_n < 30 字段；不把 SHAP 当机制证明。
+________________________________________
+Fig.5｜Cu/Fe 气氛边界对照图
+对应步骤： Step 6
+图型： paired SHAP comparison + direction matrix + eligibility panel
+子图数量： 4
+服务 claim： C2
+同构依据： DOI:10.4191/kcers.2017.54.1.04；DOI:10.3390/colorants1040023
+数据来源文件： E4 A_sub vs B SHAP 表、Cu/Fe 非零样本表、D_atm 桥接表
+Fig.5a：A_sub vs B mean_abs_SHAP 对比
+横轴：CuO、Cu2O、FeO、Fe2O3。
+纵轴：mean_abs_SHAP。
+分组：A_sub、B。
+颜色：A_sub 蓝灰；B 灰紫。
+一句话结论：加入 atmosphere_cn 后 Cu/Fe 解释强度是否下降 ≥ 50%。
+Fig.5b：Cu/Fe 方向一致性矩阵
+横轴：Cu/Fe 字段。
+纵轴：RGB 通道。
+颜色：方向一致蓝；方向反转紫红；不可解释灰。
+一句话结论：Cu/Fe 方向是否因气氛边界发生冲突。
+Fig.5c：Cu/Fe 样本下限资格图
+横轴：CuO、Cu2O、FeO、Fe2O3。
+纵轴：nonzero_n。
+参考线：nonzero_n = 30。
+颜色：达标蓝；未达标灰。
+一句话结论：只有 nonzero_n ≥ 30 的字段才允许解释方向。
+Fig.5d：C2 判定状态图
+横轴：Cu/Fe 字段。
+纵轴：C2 status。
+状态：条件化一致、气氛敏感、样本不足、不解释。
+颜色：条件化一致蓝；气氛敏感紫红；样本不足灰；不解释深灰。
+一句话结论：Cu/Fe 解释最终只能进入条件化一致或降级状态。
+禁止混入内容：
+不把 B 写成主模型；不把 atmosphere_cn 写成工艺真值；不把 E4 结果回推 C1。
+________________________________________
+Table3｜失败→降级决策表
+对应步骤： Step 8–Step 9
+图型： 主文判定表
+服务 claim： C1 / C2
+同构依据： DOI:10.1145/3287560.3287596；arXiv:1810.03993
+数据来源文件： E1–E4 判定结果表
+触发条件	Claim 状态	允许写法	禁止写法
+E1 改进 < 5%	C1 失败	未观察到稳定增量	扩展 UMF 仍显示潜在优势
+默认色主导	C1 降级	默认颜色敏感关联	模型稳定预测烧成颜色
+D_no_default 改进 < 3%	C1 降级	非默认色稳定证据不足	非默认色中仍有可靠规律
+SHAP 不稳定	解释降级	仅报告预测关联	SHAP 揭示因果机制
+D_atm < 100	C2 不检验	气氛子集不足	气氛样本少但可辅助验证
+Cu/Fe 方向反转或下降 ≥ 50%	C2 冲突	Cu/Fe 气氛敏感	Cu/Fe 颜色作用被确认
+________________________________________
+4. 主表与补充表清单
+主表
+表号	表题	数据来源	作用
+Table1	E0 数据复算总表	字段复算表、样本复算表、缺失率表	支撑 Fig1 和主实验可运行性
+Table2	E1–E3 模型性能汇总	E1/E2/E3 输出	支撑 Fig2/Fig3
+Table3	失败→降级决策表	E1–E4 判定结果	固定 C1/C2 降级路径
+补充表
+表号	表题	数据来源
+Table S1	原始字段存在性与类型表	E0 字段复算
+Table S2	RGB 合法性与默认色统计	E0 RGB 检查
+Table S3	cone 编码与缺失记录	E0 cone 检查
+Table S4	UMF 字段清单、缺失率与非零计数	E0 UMF 检查
+Table S5	D_main / D_no_default / D_atm 样本桥接表	Step 2
+Table S6	E1 全量模型输出	Step 3
+Table S7	E2 默认色分组误差	Step 4
+Table S8	E3 D_no_default 重训与 SHAP	Step 5
+Table S9	E4 Cu/Fe 气氛边界结果	Step 6
+Table S10	图表生成 provenance	图表输入文件、版本、配色、导出格式
+________________________________________
+5. C1 / C2 判定规则书
+允许输出
+C1 只允许输出：
+1.	支持 extended UMF + cone 与 RGB 的稳定统计关联；
+2.	默认颜色敏感关联；
+3.	非默认色稳定关联证据不足；
+4.	未观察到相对 GlazyBench-like 输入的稳定增量。
+C2 只允许输出：
+1.	Cu/Fe 方向在气氛可用子集中条件化一致；
+2.	Cu/Fe 解释气氛敏感；
+3.	气氛样本不足，不报告 Cu/Fe 稳定方向；
+4.	Cu/Fe 单字段样本不足，不解释方向。
+判定规则摘要
+Claim	confirmed 条件	downgraded 条件	不允许写法
+C1	E1 ≥ 5%；E3 ≥ 3%；p < 0.05；95% CI 不跨 0；默认色不主导	任一硬阈值失败	模型证明颜色机制
+C2	D_atm ≥ 100；Cu/Fe nonzero_n ≥ 30；方向不反转；SHAP 强度下降 < 50%	样本不足、方向冲突或强度下降 ≥ 50%	Cu/Fe 颜色作用被验证
+________________________________________
+6. 图表导出文件清单
+图表	导出文件
+Fig.1	Fig1_Glazy_RGB_workflow.svg；Fig1_Glazy_RGB_workflow.pdf
+Table1	Table1_E0_recalculation_master.xlsx；Table1_E0_recalculation_master.docx
+Fig.2	Fig2_E1_main_performance.svg；Fig2_E1_main_performance.pdf
+Fig.3	Fig3_default_color_robustness.svg；Fig3_default_color_robustness.pdf
+Fig.4	Fig4_D_no_default_SHAP.svg；Fig4_D_no_default_SHAP.pdf
+Fig.5	Fig5_CuFe_atmosphere_boundary.svg；Fig5_CuFe_atmosphere_boundary.pdf
+Table3	Table3_failure_downgrade_rulebook.xlsx；Table3_failure_downgrade_rulebook.docx
+统一规范：
+优先 SVG/PDF 矢量；字体 Arial/Helvetica；所有图注必须写明：SHAP 为模型关联解释，不代表因果机制；atmosphere_cn 不代表标准化工艺真值。
+________________________________________
+7. 自动打回检查结果
+检查项	结果
+主问题是否单一	通过：仅围绕 extended UMF + cone → RGB。
+是否引入第二主线	通过：atmosphere_cn 仅用于 Cu/Fe 边界。
+是否做因果宣称	通过：SHAP 仅作模型关联解释。
+是否做方法论论文叙事	通过：固定 LightGBM，不做模型排行。
+是否保留未复算标记	通过：所有数值复算前均为“待确认”。
+Step 2 DOI 是否更稳	通过：补充 Datasheets 与 GlazyBench，保留 Model Cards。
+Step 3/5 统计检验对象是否锁定	通过：固定为同 split/seed 的 Mean_MAE 配对差值。
+Fig3d 阈值线图注是否锁定	通过：已明确不同样本口径阈值不用于跨口径性能优劣断言。
+主图子图数是否符合 1/4/6 规则	通过：Fig1–Fig5 均为 4 子图。
+图表是否详细到子图	通过。
+图表-步骤-文件是否一致	通过。
+是否触发自动打回	未触发。
+Phase D 完整方案通过。
+
